@@ -1,10 +1,13 @@
+import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     react({
       babel: {
         plugins: [['babel-plugin-react-compiler']],
@@ -13,25 +16,31 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'My App',
-        short_name: 'MyApp',
+        name: 'Stride',
+        short_name: 'Stride',
+        description: 'Gamified weightlifting logger',
         start_url: '/',
         display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#000000',
+        background_color: '#0F0F14',
+        theme_color: '#0F0F14',
         icons: [
           {
-            src: 'pwa-192.png',
+            src: 'web-app-manifest-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
           },
           {
-            src: 'pwa-512.png',
+            src: 'web-app-manifest-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
-      }
-    })
+            type: 'image/png',
+          },
+        ],
+      },
+    }),
   ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
 });

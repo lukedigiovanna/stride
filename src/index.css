@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+/* ─── Tailwind v4: map CSS variables to utility class tokens ─────────────── */
+@theme inline {
+  --color-background:         var(--background);
+  --color-foreground:         var(--foreground);
+  --color-surface:            var(--surface);
+  --color-card:               var(--card);
+  --color-card-foreground:    var(--card-foreground);
+  --color-popover:            var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary:            var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary:          var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:              var(--muted);
+  --color-muted-foreground:   var(--muted-foreground);
+  --color-accent:             var(--accent);
+  --color-accent-foreground:  var(--accent-foreground);
+  --color-destructive:        var(--destructive);
+  --color-border:             var(--border);
+  --color-input:              var(--input);
+  --color-ring:               var(--ring);
+  --color-xp-start:           var(--xp-start);
+  --color-xp-end:             var(--xp-end);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ─── Midnight + Amber theme ─────────────────────────────────────────────── */
+:root {
+  /* Base */
+  --background:              #0F0F14;
+  --foreground:              #F5F0E8;
+  --surface:                 #1A1A24;
+
+  /* Card / Popover — same as surface */
+  --card:                    #1A1A24;
+  --card-foreground:         #F5F0E8;
+  --popover:                 #1A1A24;
+  --popover-foreground:      #F5F0E8;
+
+  /* Primary — amber accent */
+  --primary:                 #F59E0B;
+  --primary-foreground:      #0F0F14;
+
+  /* Secondary — slightly lighter surface */
+  --secondary:               #24243A;
+  --secondary-foreground:    #F5F0E8;
+
+  /* Muted */
+  --muted:                   #1A1A24;
+  --muted-foreground:        #7A7A8C;
+
+  /* Accent — same as primary for shadcn compatibility */
+  --accent:                  #F59E0B;
+  --accent-foreground:       #0F0F14;
+
+  /* Destructive */
+  --destructive:             #EF4444;
+
+  /* Borders and inputs */
+  --border:                  #2A2A38;
+  --input:                   #2A2A38;
+  --ring:                    #F59E0B;
+
+  /* XP gradient endpoints */
+  --xp-start:                #F59E0B;
+  --xp-end:                  #F97316;
+
+  /* Border radius base */
+  --radius:                  0.625rem;
+}
+
+/* ─── Utilities ──────────────────────────────────────────────────────────── */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+/* ─── Base styles ────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    border-color: var(--border);
+    /* Prevent double-tap zoom on interactive elements */
+    touch-action: manipulation;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Use dynamic viewport height so the layout adapts when the
+       virtual keyboard appears on mobile */
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  /* Scrollbar styling for webkit browsers */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+  }
+}
