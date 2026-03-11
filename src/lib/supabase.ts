@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabaseUrl = "https://ygxetvlkqwbsuyxlmkuf.supabase.co" as string;
+const supabaseAnonKey = "sb_publishable_tMCmN_v-WBjjMHz1vXlFpw_RAGbQTPI" as string;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
