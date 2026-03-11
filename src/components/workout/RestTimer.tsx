@@ -29,9 +29,9 @@ export default function RestTimer() {
 
   useEffect(() => {
     if (!isActive && secondsRemaining === 0) {
-      setJustDone(true);
-      const t = setTimeout(() => setJustDone(false), 1500);
-      return () => clearTimeout(t);
+      const t1 = setTimeout(() => setJustDone(true), 0);
+      const t2 = setTimeout(() => setJustDone(false), 1500);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
     }
   }, [isActive, secondsRemaining]);
 

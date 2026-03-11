@@ -38,6 +38,7 @@ export function useProgressPhotos(): UseProgressPhotosReturn {
 
   const fetchPhotos = useCallback(async () => {
     if (!user) return;
+    setIsLoading(true);
     setError(null);
 
     const { data, error: dbError } = await supabase
@@ -69,7 +70,6 @@ export function useProgressPhotos(): UseProgressPhotosReturn {
 
   useEffect(() => {
     if (!user) return;
-    setIsLoading(true);
     fetchPhotos().finally(() => setIsLoading(false));
   }, [user, fetchPhotos]);
 

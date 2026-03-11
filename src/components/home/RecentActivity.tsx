@@ -89,7 +89,6 @@ export default function RecentActivity() {
     }
 
     loadVolumes();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, workouts]);
 
   if (isLoading) {

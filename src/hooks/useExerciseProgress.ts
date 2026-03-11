@@ -23,14 +23,11 @@ interface UseExerciseProgressReturn {
 export function useExerciseProgress(exerciseId: string): UseExerciseProgressReturn {
   const { user } = useAuth();
   const [progress, setProgress] = useState<UserExerciseProgress | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user || !exerciseId) {
-      setIsLoading(false);
-      return;
-    }
+    if (!user || !exerciseId) return;
 
     setIsLoading(true);
     setError(null);

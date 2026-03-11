@@ -6,10 +6,18 @@ import {
   useRef,
   useState,
 } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { checkLevelUp, createInitialProgress } from '@/lib/levelUp';
 import { calcStrengthSetXP, calcCardioSetXP } from '@/lib/xp';
+import {
+  type PendingSetInsert,
+  loadQueue,
+  saveQueue,
+  enqueue,
+  dequeue,
+} from '@/lib/offlineQueue';
 import type {
   ActiveWorkout,
   ActiveExerciseEntry,
@@ -196,7 +204,6 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
 
     hydrate();
   // Only run once on mount / user change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   // ── Rest timer tick ────────────────────────────────────────────────────────
@@ -339,12 +346,117 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
 
   // ── Set management ─────────────────────────────────────────────────────────
 
+  // ── Offline queue flush ────────────────────────────────────────────────────
+
+  const flushOfflineQueue = useCallback(async () => {
+    const queue = loadQueue();
+    if (queue.length === 0) return;
+
+    const remaining: PendingSetInsert[] = [];
+
+    for (const entry of queue) {
+      const { data, error } = await supabase
+        .from('sets')
+        .insert({
+          user_id: entry.userId,
+          workout_id: entry.workoutId,
+          exercise_id: entry.exerciseId,
+          set_number: entry.setNumber,
+          weight_lbs: entry.weightLbs,
+          reps: entry.reps,
+          notes: entry.notes,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        remaining.push(entry);
+        continue;
+      }
+
+      const realSet = data as WorkoutSet;
+
+      // Replace temp ID with real ID in local state
+      setActiveWorkoutRaw((prev) => {
+        if (!prev) return prev;
+        const updatedEntries = { ...prev.entries };
+        for (const [exId, exEntry] of Object.entries(updatedEntries)) {
+          const idx = exEntry.sets.findIndex((s) => s.id === entry.tempId);
+          if (idx !== -1) {
+            const updatedSets = [...exEntry.sets];
+            updatedSets[idx] = realSet;
+            updatedEntries[exId] = { ...exEntry, sets: updatedSets };
+            break;
+          }
+        }
+        const next = { ...prev, entries: updatedEntries };
+        saveToStorage(next);
+        return next;
+      });
+
+      dequeue(entry.tempId);
+    }
+
+    saveQueue(remaining);
+
+    if (remaining.length === 0) {
+      toast.success('Back online — all sets synced.');
+    }
+  }, []);
+
+  // Listen for reconnect to flush any queued sets
+  useEffect(() => {
+    const handler = () => flushOfflineQueue();
+    window.addEventListener('online', handler);
+    return () => window.removeEventListener('online', handler);
+  }, [flushOfflineQueue]);
+
   const logSet = useCallback(
     async (exercise: Exercise, weightLbs: number, reps: number, notes?: string) => {
       if (!activeWorkout || !user) throw new Error('No active workout.');
 
       const existingEntry = activeWorkout.entries[exercise.id];
       const setNumber = (existingEntry?.sets.length ?? 0) + 1;
+      const now = new Date().toISOString();
+
+      // Generate a temporary ID for optimistic update
+      const tempId = `temp_${crypto.randomUUID()}`;
+
+      const optimisticSet: WorkoutSet = {
+        id: tempId,
+        user_id: user.id,
+        workout_id: activeWorkout.workoutId,
+        exercise_id: exercise.id,
+        set_number: setNumber,
+        weight_lbs: weightLbs,
+        reps,
+        logged_at: now,
+        notes: notes ?? null,
+      };
+
+      // Optimistically update local state immediately
+      const optimisticWorkout: ActiveWorkout = {
+        ...activeWorkout,
+        entries: {
+          ...activeWorkout.entries,
+          [exercise.id]: {
+            exercise,
+            sets: [...(existingEntry?.sets ?? []), optimisticSet],
+            lastLoggedAt: now,
+          },
+        },
+      };
+      setActiveWorkout(optimisticWorkout);
+
+      // Ensure a progress row exists (first time only)
+      if (!existingEntry && exercise.level_increment_lbs !== null) {
+        const initialProgress = createInitialProgress(user.id, exercise);
+        if (initialProgress) {
+          supabase
+            .from('user_exercise_progress')
+            .upsert(initialProgress, { onConflict: 'user_id,exercise_id' });
+        }
+      }
 
       // Write to DB
       const { data, error } = await supabase
@@ -361,29 +473,39 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
         .select()
         .single();
 
-      if (error) throw new Error(error.message);
-      const newSet = data as WorkoutSet;
-
-      // Ensure a progress row exists for this exercise (first time only)
-      if (!existingEntry && exercise.level_increment_lbs !== null) {
-        const initialProgress = createInitialProgress(user.id, exercise);
-        if (initialProgress) {
-          await supabase
-            .from('user_exercise_progress')
-            .upsert(initialProgress, { onConflict: 'user_id,exercise_id' });
-        }
+      if (error) {
+        // Network failure — queue for retry when back online
+        const pending: PendingSetInsert = {
+          tempId,
+          userId: user.id,
+          workoutId: activeWorkout.workoutId,
+          exerciseId: exercise.id,
+          setNumber,
+          weightLbs,
+          reps,
+          notes: notes ?? null,
+          enqueuedAt: now,
+        };
+        enqueue(pending);
+        toast.warning("You're offline — set saved locally, will sync when reconnected.", {
+          id: 'offline-warning',
+          duration: 5000,
+        });
+        return; // local state already updated optimistically
       }
 
-      // Update local state
-      const now = new Date().toISOString();
+      const realSet = data as WorkoutSet;
+
+      // Replace temp ID with the real DB ID
       setActiveWorkout({
-        ...activeWorkout,
+        ...optimisticWorkout,
         entries: {
-          ...activeWorkout.entries,
+          ...optimisticWorkout.entries,
           [exercise.id]: {
-            exercise,
-            sets: [...(existingEntry?.sets ?? []), newSet],
-            lastLoggedAt: now,
+            ...optimisticWorkout.entries[exercise.id],
+            sets: optimisticWorkout.entries[exercise.id].sets.map((s) =>
+              s.id === tempId ? realSet : s,
+            ),
           },
         },
       });

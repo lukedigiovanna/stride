@@ -1,14 +1,14 @@
+import { motion } from 'framer-motion';
 import type { GamificationState } from '@/types';
 
 interface XPBarProps {
   gamification: GamificationState;
-  /** Show xp counts below the bar. Defaults to true. */
   showLabel?: boolean;
 }
 
 /**
- * Amber gradient progress bar representing XP progress within the current level.
- * Fill proportion = xpIntoCurrentLevel / xpRequiredForNextLevel.
+ * Amber gradient progress bar. Fill animates with a spring whenever
+ * xpIntoCurrentLevel changes.
  */
 export default function XPBar({ gamification, showLabel = true }: XPBarProps) {
   const { xpIntoCurrentLevel, xpRequiredForNextLevel } = gamification;
@@ -18,15 +18,13 @@ export default function XPBar({ gamification, showLabel = true }: XPBarProps) {
 
   return (
     <div className="w-full space-y-1">
-      {/* Track */}
       <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-        {/* Fill */}
-        <div
+        <motion.div
           className="h-full rounded-full"
-          style={{
-            width: `${(pct * 100).toFixed(1)}%`,
-            background: 'linear-gradient(90deg, var(--xp-start), var(--xp-end))',
-          }}
+          initial={{ width: 0 }}
+          animate={{ width: `${(pct * 100).toFixed(2)}%` }}
+          transition={{ type: 'spring', stiffness: 100, damping: 20, mass: 1 }}
+          style={{ background: 'linear-gradient(90deg, var(--xp-start), var(--xp-end))' }}
         />
       </div>
 

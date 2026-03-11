@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import type { BodyweightLog } from '@/types';
@@ -53,14 +53,14 @@ export function useBodyweightLogs(): UseBodyweightLogsReturn {
   }, [user, fetchLogs]);
 
   /** Compute 7-day rolling average from in-memory logs. */
-  const sevenDayAvgLbs: number | null = (() => {
+  const sevenDayAvgLbs: number | null = useMemo(() => {
     const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const recent = logs.filter(
       (l) => new Date(l.logged_at).getTime() >= cutoff,
     );
     if (recent.length === 0) return null;
     return recent.reduce((sum, l) => sum + l.weight_lbs, 0) / recent.length;
-  })();
+  }, [logs]);
 
   const logWeight = useCallback(
     async (weightLbs: number, notes?: string) => {

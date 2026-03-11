@@ -33,6 +33,7 @@ export function useWorkouts(): UseWorkoutsReturn {
   const fetchPage = useCallback(
     async (pageIndex: number, replace: boolean) => {
       if (!user) return;
+      setIsLoading(true);
       setError(null);
 
       const from = pageIndex * PAGE_SIZE;
@@ -60,7 +61,6 @@ export function useWorkouts(): UseWorkoutsReturn {
 
   useEffect(() => {
     if (!user) return;
-    setIsLoading(true);
     fetchPage(0, true).finally(() => setIsLoading(false));
   }, [user, fetchPage]);
 

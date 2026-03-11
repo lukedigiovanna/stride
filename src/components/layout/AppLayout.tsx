@@ -1,5 +1,8 @@
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useWorkout } from '@/context/WorkoutContext';
+import { useAuth } from '@/context/AuthContext';
+import { bootstrapReminders } from '@/lib/notifications';
 import BottomNav from './BottomNav';
 import WorkoutBar from './WorkoutBar';
 
@@ -19,6 +22,16 @@ const WORKOUT_BAR_HEIGHT_PX = 52;
  */
 export default function AppLayout() {
   const { isWorkoutActive } = useWorkout();
+  const { profile } = useAuth();
+
+  // Bootstrap notification reminders once profile is loaded
+  useEffect(() => {
+    if (!profile) return;
+    bootstrapReminders(
+      profile.bodyweight_reminder_time ?? null,
+      profile.progress_photo_reminder_day ?? null,
+    );
+  }, [profile]); // run once per user session
 
   const bottomPadding = isWorkoutActive
     ? NAV_HEIGHT_PX + WORKOUT_BAR_HEIGHT_PX

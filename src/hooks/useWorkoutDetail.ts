@@ -35,6 +35,7 @@ export function useWorkoutDetail(workoutId: string): UseWorkoutDetailReturn {
 
   const fetchDetail = useCallback(async () => {
     if (!user || !workoutId) return;
+    setIsLoading(true);
     setError(null);
 
     // 1. Fetch the workout row
@@ -122,7 +123,6 @@ export function useWorkoutDetail(workoutId: string): UseWorkoutDetailReturn {
   }, [user, workoutId]);
 
   useEffect(() => {
-    setIsLoading(true);
     fetchDetail().finally(() => setIsLoading(false));
   }, [fetchDetail]);
 
