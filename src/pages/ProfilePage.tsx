@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { startOfDay, subDays, parseISO } from 'date-fns';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
-import { useWorkout } from '@/context/WorkoutContext';
 import RankCard from '@/components/profile/RankCard';
 import BodyweightSection from '@/components/profile/BodyweightSection';
 import ProgressPhotos from '@/components/profile/ProgressPhotos';
@@ -55,8 +54,6 @@ const DAY_OPTIONS: { value: DayOfWeek; label: string }[] = [
   { value: 'saturday',  label: 'Saturday'  },
 ];
 
-const REST_KEY = 'stride_rest_duration';
-
 // ─── Section wrapper ──────────────────────────────────────────────────────────
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -96,7 +93,6 @@ function StatTile({ label, value }: { label: string; value: string }) {
 
 export default function ProfilePage() {
   const { user, profile, signOut, updateProfile } = useAuth();
-  const { restTimer, setRestDuration } = useWorkout();
 
   // Lifetime stats state
   const [totalWorkouts, setTotalWorkouts] = useState<number | null>(null);
@@ -106,10 +102,6 @@ export default function ProfilePage() {
 
   // Settings local state (mirrors profile)
   const [weightUnit, setWeightUnit] = useState<WeightUnit>(profile?.weight_unit ?? 'lbs');
-  const [restDefault, setRestDefault] = useState<number>(() => {
-    const stored = localStorage.getItem(REST_KEY);
-    return stored ? parseInt(stored, 10) : restTimer.durationSeconds;
-  });
   const [reminderTime, setReminderTime] = useState(profile?.bodyweight_reminder_time?.slice(0, 5) ?? '');
   const [photoDay, setPhotoDay] = useState<DayOfWeek | ''>(profile?.progress_photo_reminder_day ?? '');
 
@@ -187,14 +179,6 @@ export default function ProfilePage() {
   async function handleWeightUnitChange(unit: WeightUnit) {
     setWeightUnit(unit);
     await saveProfileField({ weight_unit: unit });
-  }
-
-  function handleRestDefaultChange(val: string) {
-    const n = parseInt(val, 10);
-    if (isNaN(n) || n < 15) return;
-    setRestDefault(n);
-    localStorage.setItem(REST_KEY, String(n));
-    setRestDuration(n);
   }
 
   async function handleReminderTimeChange(val: string) {
@@ -281,21 +265,6 @@ export default function ProfilePage() {
                     {u}
                   </button>
                 ))}
-              </div>
-            </SettingRow>
-
-            {/* Rest timer default */}
-            <SettingRow label="Rest timer default">
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="number"
-                  min="15"
-                  step="15"
-                  value={restDefault}
-                  onChange={(e) => handleRestDefaultChange(e.target.value)}
-                  className="w-16 text-sm text-center bg-background border border-border rounded px-2 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-                <span className="text-xs text-muted-foreground">sec</span>
               </div>
             </SettingRow>
 

@@ -32,7 +32,6 @@ import type {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'stride_active_workout';
-const DEFAULT_REST_DURATION = 90;
 
 // ─── Context type ─────────────────────────────────────────────────────────────
 
@@ -71,12 +70,9 @@ interface WorkoutContextValue {
   // ── Rest timer ─────────────────────────────────────────────────────────────
   restTimer: RestTimerState;
   startRestTimer: () => void;
+  pauseRestTimer: () => void;
+  resumeRestTimer: () => void;
   resetRestTimer: () => void;
-  stopRestTimer: () => void;
-  /** Adds or subtracts seconds from the current countdown. */
-  adjustRestTimer: (deltaSeconds: number) => void;
-  /** Sets the duration the timer resets to. */
-  setRestDuration: (seconds: number) => void;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -110,9 +106,9 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
   const [activeWorkout, setActiveWorkoutRaw] = useState<ActiveWorkout | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [restTimer, setRestTimer] = useState<RestTimerState>({
-    isActive: false,
-    secondsRemaining: DEFAULT_REST_DURATION,
-    durationSeconds: DEFAULT_REST_DURATION,
+    status: 'idle',
+    elapsedMs: 0,
+    startTime: null,
   });
 
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -209,19 +205,11 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
   // ── Rest timer tick ────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (restTimer.isActive) {
+    if (restTimer.status === 'running') {
       timerIntervalRef.current = setInterval(() => {
-        setRestTimer((prev) => {
-          if (prev.secondsRemaining <= 1) {
-            // Timer complete
-            if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-            // Haptic feedback where supported
-            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-            return { ...prev, isActive: false, secondsRemaining: 0 };
-          }
-          return { ...prev, secondsRemaining: prev.secondsRemaining - 1 };
-        });
-      }, 1000);
+        // Force re-render; elapsed time is computed from startTime on each render.
+        setRestTimer((prev) => ({ ...prev }));
+      }, 50);
     } else if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
     }
@@ -229,7 +217,7 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     return () => {
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     };
-  }, [restTimer.isActive]);
+  }, [restTimer.status]);
 
   // ── Workout lifecycle ──────────────────────────────────────────────────────
 
@@ -578,42 +566,23 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
   // ── Rest timer controls ────────────────────────────────────────────────────
 
   const startRestTimer = useCallback(() => {
+    setRestTimer({ status: 'running', elapsedMs: 0, startTime: Date.now() });
+  }, []);
+
+  const pauseRestTimer = useCallback(() => {
     setRestTimer((prev) => ({
-      ...prev,
-      isActive: true,
-      secondsRemaining: prev.durationSeconds,
+      status: 'paused',
+      elapsedMs: prev.elapsedMs + (prev.startTime ? Date.now() - prev.startTime : 0),
+      startTime: null,
     }));
+  }, []);
+
+  const resumeRestTimer = useCallback(() => {
+    setRestTimer((prev) => ({ ...prev, status: 'running', startTime: Date.now() }));
   }, []);
 
   const resetRestTimer = useCallback(() => {
-    setRestTimer((prev) => ({
-      ...prev,
-      isActive: true,
-      secondsRemaining: prev.durationSeconds,
-    }));
-  }, []);
-
-  const stopRestTimer = useCallback(() => {
-    setRestTimer((prev) => ({
-      ...prev,
-      isActive: false,
-      secondsRemaining: prev.durationSeconds,
-    }));
-  }, []);
-
-  const adjustRestTimer = useCallback((deltaSeconds: number) => {
-    setRestTimer((prev) => ({
-      ...prev,
-      secondsRemaining: Math.max(1, prev.secondsRemaining + deltaSeconds),
-    }));
-  }, []);
-
-  const setRestDuration = useCallback((seconds: number) => {
-    setRestTimer((prev) => ({
-      ...prev,
-      durationSeconds: seconds,
-      secondsRemaining: prev.isActive ? prev.secondsRemaining : seconds,
-    }));
+    setRestTimer({ status: 'idle', elapsedMs: 0, startTime: null });
   }, []);
 
   // ── Provide ────────────────────────────────────────────────────────────────
@@ -633,10 +602,9 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
         deleteSet,
         restTimer,
         startRestTimer,
+        pauseRestTimer,
+        resumeRestTimer,
         resetRestTimer,
-        stopRestTimer,
-        adjustRestTimer,
-        setRestDuration,
       }}
     >
       {children}

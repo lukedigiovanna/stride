@@ -237,9 +237,12 @@ export interface GamificationState {
 }
 
 /** State of the rest timer held in WorkoutContext. */
+export type RestTimerStatus = 'idle' | 'running' | 'paused';
+
 export interface RestTimerState {
-  isActive: boolean;
-  secondsRemaining: number;
-  /** The duration the timer resets to when Reset is tapped. */
-  durationSeconds: number;
+  status: RestTimerStatus;
+  /** Accumulated ms from previous run segments (before current resume). */
+  elapsedMs: number;
+  /** Date.now() at the moment the current segment started; null when not running. */
+  startTime: number | null;
 }
