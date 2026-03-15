@@ -209,7 +209,7 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
       timerIntervalRef.current = setInterval(() => {
         // Force re-render; elapsed time is computed from startTime on each render.
         setRestTimer((prev) => ({ ...prev }));
-      }, 50);
+      }, 10);
     } else if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
     }
