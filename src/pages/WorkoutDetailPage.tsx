@@ -86,7 +86,7 @@ function HistorySetRow({
           inputMode="decimal"
           value={weightVal}
           onChange={(e) => setWeightVal(e.target.value)}
-          className="w-20 text-xs bg-background border border-border rounded px-2 py-1 text-center text-foreground"
+          className="w-20 text-xs bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-1 text-center text-foreground focus:outline-none focus:border-foreground"
           placeholder={isCardio ? 'mi' : 'lbs'}
           autoFocus
         />
@@ -96,11 +96,11 @@ function HistorySetRow({
           inputMode="decimal"
           value={repsVal}
           onChange={(e) => setRepsVal(e.target.value)}
-          className="w-16 text-xs bg-background border border-border rounded px-2 py-1 text-center text-foreground"
+          className="w-16 text-xs bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-1 text-center text-foreground focus:outline-none focus:border-foreground"
           placeholder={isCardio ? 'min' : 'reps'}
         />
         <div className="ml-auto flex items-center gap-1">
-          <button onClick={handleSave} disabled={isSaving} className="p-1 text-primary active:opacity-70">
+          <button onClick={handleSave} disabled={isSaving} className="p-1 text-foreground active:opacity-70">
             <Check className="h-4 w-4" />
           </button>
           <button onClick={handleCancel} className="p-1 text-muted-foreground active:opacity-70">
@@ -292,7 +292,7 @@ export default function WorkoutDetailPage() {
                 <h3 className="text-sm font-semibold text-foreground">{entry.exercise.name}</h3>
               </div>
 
-              <div className="rounded-xl border border-border overflow-hidden">
+              <div className="rounded-sm border border-border overflow-hidden">
                 {entry.sets.map((set, idx) => (
                   <HistorySetRow
                     key={set.id}
@@ -317,7 +317,7 @@ export default function WorkoutDetailPage() {
             onBlur={handleNotesBlur}
             placeholder="Add workout notes…"
             rows={3}
-            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none focus:outline-none focus:border-foreground transition-colors"
           />
         </div>
 

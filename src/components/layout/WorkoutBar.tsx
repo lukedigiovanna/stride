@@ -78,20 +78,20 @@ export default function WorkoutBar() {
         height: '52px',
       }}
     >
-      {/* Blur layer — isolated so it doesn't prevent text repaints */}
-      <div className="absolute inset-0 bg-primary/10 border-t border-primary/30 backdrop-blur-sm" />
+      {/* Background layer */}
+      <div className="absolute inset-0 bg-surface border-t-2 border-foreground/20" />
 
       {/* Content layer */}
       <div className="relative flex items-center gap-3 px-4 h-full">
         {/* Icon */}
-        <Dumbbell className="h-4 w-4 text-primary shrink-0" strokeWidth={2} />
+        <Dumbbell className="h-4 w-4 text-foreground shrink-0" strokeWidth={2} />
 
         {/* Label */}
-        <span className="text-sm font-semibold text-primary">Workout in progress</span>
+        <span className="text-sm font-bold text-foreground tracking-wide">Workout in progress</span>
 
         {/* Stats */}
         <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="tabular-nums font-medium text-foreground">{elapsed}</span>
+          <span className="tabular-nums font-bold text-foreground">{elapsed}</span>
           <span className="text-border">·</span>
           <span className="tabular-nums">{volume}</span>
           <span className="text-border">·</span>

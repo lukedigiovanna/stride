@@ -88,9 +88,9 @@ function ChartSection({ sessions, isCardio }: { sessions: Session[]; isCardio: b
           <button
             key={label}
             onClick={() => setRange(label)}
-            className={`rounded-full px-3 py-1 text-xs font-medium border transition-colors ${
+            className={`rounded-sm px-3 py-1 text-xs font-bold border transition-colors ${
               range === label
-                ? 'bg-primary text-primary-foreground border-primary'
+                ? 'bg-foreground text-background border-foreground'
                 : 'bg-transparent border-border text-muted-foreground'
             }`}
           >
@@ -138,7 +138,7 @@ function ChartSection({ sessions, isCardio }: { sessions: Session[]; isCardio: b
                 <XAxis dataKey="date" tick={axisStyle} axisLine={false} tickLine={false} />
                 <YAxis tick={axisStyle} axisLine={false} tickLine={false} width={40} />
                 <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="volume" fill={amber} radius={[3, 3, 0, 0]} />
+                <Bar dataKey="volume" fill={amber} radius={[0, 0, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -175,7 +175,7 @@ function SetHistory({ sessions, isCardio }: { sessions: Session[]; isCardio: boo
           <p className="text-xs text-muted-foreground">
             {format(parseISO(session.startedAt), 'EEEE, MMM d')}
           </p>
-          <div className="rounded-xl border border-border overflow-hidden">
+          <div className="rounded-sm border border-border overflow-hidden">
             {session.sets.map((set, idx) => (
               <div
                 key={set.id}

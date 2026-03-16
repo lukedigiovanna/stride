@@ -48,7 +48,7 @@ export default function RankCard({ profile }: RankCardProps) {
     : 'Max rank reached';
 
   return (
-    <div className="rounded-xl bg-surface border border-border p-5 space-y-4 mx-4">
+    <div className="rounded-sm bg-surface border border-border p-5 space-y-4 mx-4">
       {/* Name row */}
       <div className="flex items-center gap-2">
         {isEditing ? (
@@ -57,10 +57,10 @@ export default function RankCard({ profile }: RankCardProps) {
               value={nameVal}
               onChange={(e) => setNameVal(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') handleCancelName(); }}
-              className="flex-1 text-lg font-bold bg-background border border-border rounded px-2 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              className="flex-1 text-lg font-bold bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-1 text-foreground focus:outline-none focus:border-foreground transition-colors"
               autoFocus
             />
-            <button onClick={handleSaveName} disabled={isSaving} className="p-1 text-primary">
+            <button onClick={handleSaveName} disabled={isSaving} className="p-1 text-foreground">
               <Check className="h-4 w-4" />
             </button>
             <button onClick={handleCancelName} className="p-1 text-muted-foreground">
@@ -82,7 +82,7 @@ export default function RankCard({ profile }: RankCardProps) {
       {/* Rank + level */}
       <div className="flex items-end justify-between">
         <div>
-          <p className="text-2xl font-extrabold text-primary">{gam.currentRank}</p>
+          <p className="text-2xl font-extrabold text-foreground italic">{gam.currentRank}</p>
           <p className="text-sm text-muted-foreground">Level {gam.currentLevel}</p>
         </div>
         <p className="text-xs text-muted-foreground tabular-nums">

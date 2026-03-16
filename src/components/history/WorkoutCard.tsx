@@ -72,7 +72,7 @@ export default function WorkoutCard({ workout }: { workout: WorkoutWithStats }) 
           {workout.xp_earned > 0 && (
             <>
               <span className="text-border">·</span>
-              <span className="text-primary font-medium">+{workout.xp_earned} XP</span>
+              <span className="font-bold">+{workout.xp_earned} XP</span>
             </>
           )}
         </div>

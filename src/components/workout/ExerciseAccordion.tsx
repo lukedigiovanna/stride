@@ -77,7 +77,7 @@ function ExerciseCard({
     return (
       <button
         onClick={onToggle}
-        className="w-full flex flex-col px-3 py-2.5 rounded-lg text-left active:bg-border/30 transition-colors"
+        className="w-full flex flex-col px-3 py-2.5 rounded-sm text-left active:bg-border/30 transition-colors"
       >
         <div className="flex items-center gap-3">
           <span className="text-sm text-foreground flex-1">{exercise.name}</span>
@@ -93,10 +93,10 @@ function ExerciseCard({
     return (
       <button
         onClick={onToggle}
-        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-primary/30 bg-primary/5 text-left active:bg-primary/10 transition-colors"
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm border border-foreground/20 bg-surface text-left active:bg-foreground/8 transition-colors"
       >
         <span className="text-sm text-foreground flex-1">{exercise.name}</span>
-        <span className="text-xs text-primary font-medium tabular-nums">
+        <span className="text-xs text-foreground font-bold tabular-nums">
           {sets.length} {sets.length === 1 ? 'set' : 'sets'} · {formatWeight(lastWeight, weightUnit)}
         </span>
         <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -108,8 +108,8 @@ function ExerciseCard({
   return (
     <div
       className={cn(
-        'rounded-lg border px-3 py-2.5 space-y-1',
-        hasSessionSets ? 'border-primary/30 bg-primary/5' : 'border-border bg-surface',
+        'rounded-sm border px-3 py-2.5 space-y-1',
+        hasSessionSets ? 'border-foreground/25 bg-surface' : 'border-border bg-surface',
       )}
     >
       {/* Header */}
@@ -117,7 +117,7 @@ function ExerciseCard({
         <span className="text-sm font-semibold text-foreground">{exercise.name}</span>
         <div className="flex items-center gap-2">
           {hasSessionSets && (
-            <span className="text-xs text-primary font-medium tabular-nums">
+            <span className="text-xs text-foreground font-bold tabular-nums">
               {sets.length} {sets.length === 1 ? 'set' : 'sets'}
             </span>
           )}
@@ -268,7 +268,7 @@ export default function ExerciseAccordion({
                 <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
                 <span className="text-sm font-medium text-foreground">{label}</span>
                 {workedCount > 0 && (
-                  <Badge className="h-5 px-1.5 text-[10px] bg-primary text-primary-foreground">
+                  <Badge className="h-5 px-1.5 text-[10px] bg-foreground text-background rounded-sm">
                     {workedCount}
                   </Badge>
                 )}

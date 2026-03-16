@@ -54,8 +54,8 @@ export default function WorkoutSummaryModal({
     <Dialog open={open} onOpenChange={(o) => { if (!o) handleDone(); }}>
       <DialogContent className="max-w-sm bg-surface border-border flex flex-col max-h-[90dvh] overflow-y-auto">
         <DialogHeader className="text-center items-center gap-2">
-          <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mx-auto">
-            <Trophy className="h-6 w-6 text-primary" />
+          <div className="w-12 h-12 rounded-sm border-2 border-foreground flex items-center justify-center mx-auto">
+            <Trophy className="h-6 w-6 text-foreground" />
           </div>
           <DialogTitle className="text-xl">Workout Complete!</DialogTitle>
           <p className="text-sm text-muted-foreground">
@@ -72,7 +72,7 @@ export default function WorkoutSummaryModal({
           ].map(({ label, value }) => (
             <div
               key={label}
-              className="flex-1 rounded-xl bg-background border border-border py-2 px-1 flex flex-col items-center gap-0.5"
+              className="flex-1 rounded-sm bg-background border border-border py-2 px-1 flex flex-col items-center gap-0.5"
             >
               <span className="text-base font-bold text-foreground tabular-nums">{value}</span>
               <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</span>
@@ -85,7 +85,7 @@ export default function WorkoutSummaryModal({
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
             Exercises
           </h4>
-          <div className="rounded-xl border border-border overflow-hidden">
+          <div className="rounded-sm border border-border overflow-hidden">
             {entryList.map((entry, idx) => {
               const isCardio = entry.exercise.category === 'cardio';
               const sets = entry.sets.length;

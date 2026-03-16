@@ -30,55 +30,67 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* ─── Midnight + Amber theme ─────────────────────────────────────────────── */
+/* ─── Composition Notebook theme ────────────────────────────────────────── */
 :root {
-  /* Base */
-  --background:              #0F0F14;
-  --foreground:              #F5F0E8;
-  --surface:                 #1A1A24;
+  /* Base — aged cream paper + dark ink */
+  --background:              #F2EDD7;
+  --foreground:              #1C1917;
+  --surface:                 #EDE8CE;
 
-  /* Card / Popover — same as surface */
-  --card:                    #1A1A24;
-  --card-foreground:         #F5F0E8;
-  --popover:                 #1A1A24;
-  --popover-foreground:      #F5F0E8;
+  /* Card / Popover */
+  --card:                    #EDE8CE;
+  --card-foreground:         #1C1917;
+  --popover:                 #EDE8CE;
+  --popover-foreground:      #1C1917;
 
-  /* Primary — amber accent */
-  --primary:                 #F59E0B;
-  --primary-foreground:      #0F0F14;
+  /* Primary — ink dark */
+  --primary:                 #1C1917;
+  --primary-foreground:      #F2EDD7;
 
-  /* Secondary — slightly lighter surface */
-  --secondary:               #24243A;
-  --secondary-foreground:    #F5F0E8;
+  /* Secondary — deeper cream */
+  --secondary:               #E2DCC4;
+  --secondary-foreground:    #1C1917;
 
   /* Muted */
-  --muted:                   #1A1A24;
-  --muted-foreground:        #7A7A8C;
+  --muted:                   #E2DCC4;
+  --muted-foreground:        #7A6E58;
 
-  /* Accent — same as primary for shadcn compatibility */
-  --accent:                  #F59E0B;
-  --accent-foreground:       #0F0F14;
+  /* Accent — same as primary */
+  --accent:                  #1C1917;
+  --accent-foreground:       #F2EDD7;
 
-  /* Destructive */
-  --destructive:             #EF4444;
+  /* Destructive — dark red ink */
+  --destructive:             #7F1D1D;
 
-  /* Borders and inputs */
-  --border:                  #2A2A38;
-  --input:                   #2A2A38;
-  --ring:                    #F59E0B;
+  /* Borders — warm ruled-line color */
+  --border:                  #C4B99A;
+  --input:                   #C4B99A;
+  --ring:                    #1C1917;
 
-  /* XP gradient endpoints */
-  --xp-start:                #F59E0B;
-  --xp-end:                  #F97316;
+  /* XP — dark ink fill */
+  --xp-start:                #3D3520;
+  --xp-end:                  #1C1917;
 
-  /* Border radius base */
-  --radius:                  0.625rem;
+  /* Border radius — minimal, angular feel */
+  --radius:                  0.25rem;
 }
 
 /* ─── Utilities ──────────────────────────────────────────────────────────── */
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Ruled notebook lines — apply to scrollable content areas */
+  .ruled-paper {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 27px,
+      #C8D4DC 27px,
+      #C8D4DC 28px
+    );
+    background-size: 100% 28px;
+  }
 }
 
 /* ─── Base styles ────────────────────────────────────────────────────────── */
@@ -92,8 +104,7 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
-      sans-serif;
+    font-family: 'Courier Prime', 'Courier New', Courier, monospace;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* Use dynamic viewport height so the layout adapts when the

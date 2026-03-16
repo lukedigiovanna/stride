@@ -117,7 +117,7 @@ export default function ExercisesPage() {
       {/* FAB */}
       <button
         onClick={() => setCreateOpen(true)}
-        className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-full bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-lg active:opacity-90 transition-opacity"
+        className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-sm bg-foreground px-4 py-3 text-sm font-bold text-background active:opacity-80 transition-opacity"
       >
         <Plus className="h-4 w-4" />
         New Exercise

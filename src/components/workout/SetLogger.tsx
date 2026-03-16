@@ -87,7 +87,7 @@ export default function SetLogger({
               value={weightVal}
               onChange={(e) => setWeightVal(e.target.value)}
               placeholder="0.0"
-              className="w-20 text-sm bg-background border border-border rounded px-2 py-1.5 text-center text-foreground"
+              className="w-20 text-sm bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-1.5 text-center text-foreground focus:outline-none focus:border-foreground"
             />
             <span className="text-xs text-muted-foreground">mi</span>
           </div>
@@ -104,7 +104,7 @@ export default function SetLogger({
               value={repsVal}
               onChange={(e) => setRepsVal(e.target.value)}
               placeholder="0"
-              className="w-20 text-sm bg-background border border-border rounded px-2 py-1.5 text-center text-foreground"
+              className="w-20 text-sm bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-1.5 text-center text-foreground focus:outline-none focus:border-foreground"
             />
             <span className="text-xs text-muted-foreground">min</span>
           </div>
@@ -135,7 +135,7 @@ export default function SetLogger({
             value={weightVal}
             onChange={(e) => setWeightVal(e.target.value)}
             placeholder="0"
-            className="w-20 text-sm bg-background border border-border rounded px-2 py-1.5 text-center text-foreground"
+            className="w-20 text-sm bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-1.5 text-center text-foreground focus:outline-none focus:border-foreground"
           />
           <span className="text-xs text-muted-foreground">{weightUnit}</span>
         </div>
@@ -151,7 +151,7 @@ export default function SetLogger({
           value={repsVal}
           onChange={(e) => setRepsVal(e.target.value)}
           placeholder="0"
-          className="w-16 text-sm bg-background border border-border rounded px-2 py-1.5 text-center text-foreground"
+          className="w-16 text-sm bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-1.5 text-center text-foreground focus:outline-none focus:border-foreground"
         />
       </div>
 

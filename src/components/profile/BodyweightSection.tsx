@@ -187,7 +187,7 @@ export default function BodyweightSection({ unit }: BodyweightSectionProps) {
             <p className="text-xs text-muted-foreground">
               {formatDistanceToNow(parseISO(latest.logged_at), { addSuffix: true })}
               {trendText && (
-                <span className="text-amber-500 ml-1">· {trendText}</span>
+                <span className="font-bold ml-1">· {trendText}</span>
               )}
               {notEnoughData && (
                 <span className="ml-1">· Not enough data for trend</span>
@@ -216,7 +216,7 @@ export default function BodyweightSection({ unit }: BodyweightSectionProps) {
             onClick={() => { setRange(r); if (r === 'week') setWeekOffset(0); }}
             className={`text-xs pb-0.5 transition-colors ${
               range === r
-                ? 'text-amber-500 border-b border-amber-500'
+                ? 'text-foreground font-bold border-b border-foreground'
                 : 'text-muted-foreground'
             }`}
           >

@@ -10,14 +10,14 @@ export default function UserSummaryCard({ profile }: UserSummaryCardProps) {
   const gam = getGamificationState(profile.total_xp);
 
   return (
-    <div className="rounded-xl bg-surface border border-border p-4 space-y-3">
+    <div className="rounded-sm bg-surface border border-border p-4 space-y-3">
       {/* Name + rank row */}
       <div className="flex items-baseline justify-between gap-2">
         <div>
           <h2 className="text-lg font-bold text-foreground leading-tight">
             {profile.display_name ?? 'Athlete'}
           </h2>
-          <p className="text-sm text-primary font-medium">{gam.currentRank}</p>
+          <p className="text-sm text-muted-foreground font-bold italic">{gam.currentRank}</p>
         </div>
 
         {/* Level badge */}
@@ -34,7 +34,7 @@ export default function UserSummaryCard({ profile }: UserSummaryCardProps) {
         <XPBar gamification={gam} />
         {gam.nextRank && (
           <p className="mt-1 text-[10px] text-muted-foreground text-right">
-            Next rank: <span className="text-primary">{gam.nextRank}</span>
+            Next rank: <span className="font-bold">{gam.nextRank}</span>
           </p>
         )}
       </div>

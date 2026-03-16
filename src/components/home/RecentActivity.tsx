@@ -22,7 +22,7 @@ function WorkoutCard({ workout }: { workout: WorkoutWithStats }) {
   return (
     <Link
       to={`/history/${workout.id}`}
-      className="flex items-center gap-3 rounded-xl bg-surface border border-border p-3 active:bg-surface/80 transition-colors"
+      className="flex items-center gap-3 rounded-sm bg-surface border border-border p-3 active:bg-surface/80 transition-colors"
     >
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-foreground truncate">
@@ -95,7 +95,7 @@ export default function RecentActivity() {
     return (
       <div className="space-y-2">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-14 rounded-xl bg-surface border border-border animate-pulse" />
+          <div key={i} className="h-14 rounded-sm bg-surface border border-border animate-pulse" />
         ))}
       </div>
     );
@@ -118,7 +118,7 @@ export default function RecentActivity() {
       {workouts.length > 3 && (
         <Link
           to="/history"
-          className="flex items-center justify-center gap-1 text-sm text-primary font-medium py-1"
+          className="flex items-center justify-center gap-1 text-sm text-foreground font-bold py-1 underline underline-offset-2"
         >
           View all <ChevronRight className="h-4 w-4" />
         </Link>

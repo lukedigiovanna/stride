@@ -18,7 +18,7 @@ export default function XPBar({ gamification, showLabel = true }: XPBarProps) {
 
   return (
     <div className="w-full space-y-1">
-      <div className="h-2 w-full rounded-full bg-border overflow-hidden">
+      <div className="h-2 w-full rounded-none bg-border overflow-hidden">
         <motion.div
           className="h-full rounded-full"
           initial={{ width: 0 }}

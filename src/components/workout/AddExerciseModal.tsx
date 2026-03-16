@@ -67,7 +67,7 @@ export default function AddExerciseModal({
             placeholder="Search exercises…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground"
+            className="w-full pl-9 pr-3 py-2 text-sm bg-transparent border-0 border-b border-foreground/30 rounded-none text-foreground placeholder:text-muted-foreground focus:outline-none"
             autoFocus
           />
         </div>
@@ -79,9 +79,9 @@ export default function AddExerciseModal({
               key={value}
               onClick={() => setCategoryFilter(value)}
               className={cn(
-                'shrink-0 rounded-full px-3 py-1 text-xs font-medium border transition-colors',
+                'shrink-0 rounded-sm px-3 py-1 text-xs font-bold border transition-colors',
                 categoryFilter === value
-                  ? 'bg-primary text-primary-foreground border-primary'
+                  ? 'bg-foreground text-background border-foreground'
                   : 'bg-transparent border-border text-muted-foreground',
               )}
             >
@@ -99,7 +99,7 @@ export default function AddExerciseModal({
               <button
                 key={exercise.id}
                 onClick={() => handleSelect(exercise)}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left active:bg-border/30 transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-sm text-left border-b border-border last:border-b-0 active:bg-foreground/5 transition-colors"
               >
                 <span className="text-sm font-medium text-foreground">{exercise.name}</span>
                 <Badge

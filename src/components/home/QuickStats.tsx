@@ -17,7 +17,7 @@ interface Stats {
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex-1 rounded-xl bg-surface border border-border p-3 flex flex-col items-center gap-0.5">
+    <div className="flex-1 rounded-sm bg-surface border border-border p-3 flex flex-col items-center gap-0.5">
       <span className="text-xl font-extrabold text-foreground tabular-nums">{value}</span>
       <span className="text-[10px] text-muted-foreground uppercase tracking-wide text-center">{label}</span>
     </div>

@@ -82,7 +82,7 @@ function SettingRow({ label, children }: { label: string; children: React.ReactN
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex-1 rounded-xl bg-surface border border-border p-3 flex flex-col items-center gap-0.5">
+    <div className="flex-1 rounded-sm bg-surface border border-border p-3 flex flex-col items-center gap-0.5">
       <span className="text-lg font-extrabold text-foreground tabular-nums">{value}</span>
       <span className="text-[9px] text-muted-foreground uppercase tracking-wide text-center leading-tight">{label}</span>
     </div>
@@ -213,7 +213,7 @@ export default function ProfilePage() {
   if (!profile) return null;
 
   const selectClass =
-    'bg-background border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary';
+    'bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-1 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors';
 
   return (
     <div className="flex flex-col overflow-y-auto h-full pb-6">
@@ -248,17 +248,17 @@ export default function ProfilePage() {
 
         {/* Settings */}
         <Section title="Settings">
-          <div className="rounded-xl border border-border overflow-hidden mx-4">
+          <div className="rounded-sm border border-border overflow-hidden mx-4">
             {/* Weight unit */}
             <SettingRow label="Weight unit">
-              <div className="flex rounded-lg border border-border overflow-hidden text-xs font-medium">
+              <div className="flex rounded-sm border border-border overflow-hidden text-xs font-bold">
                 {(['lbs', 'kg'] as WeightUnit[]).map((u) => (
                   <button
                     key={u}
                     onClick={() => handleWeightUnitChange(u)}
                     className={`px-3 py-1.5 transition-colors ${
                       weightUnit === u
-                        ? 'bg-primary text-primary-foreground'
+                        ? 'bg-foreground text-background'
                         : 'bg-background text-muted-foreground'
                     }`}
                   >
@@ -298,7 +298,7 @@ export default function ProfilePage() {
         <div className="px-4">
           <button
             onClick={signOut}
-            className="w-full rounded-xl border border-destructive/30 py-3 text-sm font-semibold text-destructive active:bg-destructive/10 transition-colors"
+            className="w-full rounded-sm border border-destructive/40 py-3 text-sm font-bold text-destructive active:bg-destructive/10 transition-colors"
           >
             Sign Out
           </button>

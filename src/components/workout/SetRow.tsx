@@ -57,7 +57,7 @@ export default function SetRow({ set, exercise, setNumber }: SetRowProps) {
           inputMode="decimal"
           value={weightVal}
           onChange={(e) => setWeightVal(e.target.value)}
-          className="w-16 text-xs bg-background border border-border rounded px-2 py-1 text-center text-foreground"
+          className="w-16 text-xs bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-1 text-center text-foreground focus:outline-none focus:border-foreground"
           placeholder={isCardio ? 'mi' : 'lbs'}
           autoFocus
         />
@@ -69,7 +69,7 @@ export default function SetRow({ set, exercise, setNumber }: SetRowProps) {
           inputMode="decimal"
           value={repsVal}
           onChange={(e) => setRepsVal(e.target.value)}
-          className="w-14 text-xs bg-background border border-border rounded px-2 py-1 text-center text-foreground"
+          className="w-14 text-xs bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-1 text-center text-foreground focus:outline-none focus:border-foreground"
           placeholder={isCardio ? 'min' : 'reps'}
         />
 
@@ -77,7 +77,7 @@ export default function SetRow({ set, exercise, setNumber }: SetRowProps) {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="p-1 text-primary active:opacity-70"
+            className="p-1 text-foreground active:opacity-70"
           >
             <Check className="h-4 w-4" />
           </button>

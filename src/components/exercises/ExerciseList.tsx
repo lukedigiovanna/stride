@@ -43,7 +43,7 @@ function ExerciseRow({
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-sm font-medium text-foreground">{exercise.name}</span>
           {isCustom && (
-            <Badge variant="outline" className="text-[9px] px-1.5 border-primary/40 text-primary">
+            <Badge variant="outline" className="text-[9px] px-1.5 border-foreground/40 text-foreground rounded-sm">
               Custom
             </Badge>
           )}
@@ -88,9 +88,9 @@ export default function ExerciseList({ exercises, weightMap, currentUserId }: Ex
             key={value}
             onClick={() => setCategoryFilter(value)}
             className={cn(
-              'shrink-0 rounded-full px-3 py-1 text-xs font-medium border transition-colors',
+              'shrink-0 rounded-sm px-3 py-1 text-xs font-bold border transition-colors',
               categoryFilter === value
-                ? 'bg-primary text-primary-foreground border-primary'
+                ? 'bg-foreground text-background border-foreground'
                 : 'bg-transparent border-border text-muted-foreground',
             )}
           >
@@ -107,7 +107,7 @@ export default function ExerciseList({ exercises, weightMap, currentUserId }: Ex
           placeholder="Search exercises…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-9 pr-3 py-2 text-sm bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          className="w-full pl-9 pr-3 py-2 text-sm bg-transparent border-0 border-b border-foreground/30 rounded-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors"
         />
       </div>
 

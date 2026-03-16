@@ -19,7 +19,7 @@ const TABS = [
 export default function BottomNav() {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-border"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t-2 border-foreground/20"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div className="flex h-16">
@@ -31,17 +31,17 @@ export default function BottomNav() {
             className={({ isActive }) =>
               cn(
                 'flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors',
-                isActive ? 'text-primary' : 'text-muted-foreground',
+                isActive ? 'text-foreground' : 'text-muted-foreground',
               )
             }
           >
             {({ isActive }) => (
               <>
                 <Icon
-                  className={cn('h-5 w-5', isActive && 'drop-shadow-[0_0_6px_var(--accent)]')}
-                  strokeWidth={isActive ? 2.5 : 1.75}
+                  className="h-5 w-5"
+                  strokeWidth={isActive ? 2.5 : 1.5}
                 />
-                <span className="text-[10px] font-medium tracking-wide">{label}</span>
+                <span className={cn('text-[10px] tracking-wide', isActive ? 'font-bold' : 'font-normal')}>{label}</span>
               </>
             )}
           </NavLink>

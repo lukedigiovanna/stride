@@ -149,7 +149,7 @@ export default function WorkoutSheet() {
         >
           {/* Drag handle */}
           <div className="flex justify-center pt-2.5 pb-1 shrink-0">
-            <div className="w-10 h-1 rounded-full bg-border" />
+            <div className="w-10 h-0.5 bg-foreground/30" />
           </div>
 
           {/* Sticky header */}
@@ -203,7 +203,7 @@ export default function WorkoutSheet() {
 
             <button
               onClick={() => setAddExerciseOpen(true)}
-              className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-border py-3 text-sm text-muted-foreground active:bg-border/20 transition-colors"
+              className="mt-4 w-full flex items-center justify-center gap-2 rounded-sm border border-dashed border-foreground/30 py-3 text-sm text-muted-foreground active:bg-foreground/5 transition-colors"
             >
               <Plus className="h-4 w-4" />
               Add Exercise

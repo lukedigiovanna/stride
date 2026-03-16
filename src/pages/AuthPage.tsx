@@ -134,7 +134,7 @@ export default function AuthPage() {
           </p>
           <button
             onClick={() => switchMode('signin')}
-            className="text-sm text-primary underline underline-offset-4"
+            className="text-sm text-foreground underline underline-offset-4"
           >
             Back to sign in
           </button>
@@ -149,12 +149,12 @@ export default function AuthPage() {
 
         {/* Brand */}
         <div className="text-center space-y-1">
-          <h1 className="text-4xl font-black tracking-tight text-primary">STRIDE</h1>
+          <h1 className="text-4xl font-black tracking-tight text-foreground">STRIDE</h1>
           <p className="text-sm text-muted-foreground">Level up your lifts.</p>
         </div>
 
         {/* Card */}
-        <div className="bg-surface border border-border rounded-xl p-6 space-y-5">
+        <div className="bg-surface border border-border rounded-sm p-6 space-y-5">
 
           {/* Heading */}
           <h2 className="text-lg font-semibold text-foreground">
@@ -203,7 +203,7 @@ export default function AuthPage() {
 
             {/* Global error */}
             {globalError && (
-              <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+              <p className="text-sm text-destructive border border-destructive/30 rounded-sm px-3 py-2">
                 {globalError}
               </p>
             )}
@@ -230,7 +230,7 @@ export default function AuthPage() {
               <button
                 type="button"
                 onClick={() => switchMode('signup')}
-                className="text-primary underline underline-offset-4 font-medium"
+                className="text-foreground underline underline-offset-4 font-bold"
               >
                 Sign up
               </button>
@@ -241,7 +241,7 @@ export default function AuthPage() {
               <button
                 type="button"
                 onClick={() => switchMode('signin')}
-                className="text-primary underline underline-offset-4 font-medium"
+                className="text-foreground underline underline-offset-4 font-bold"
               >
                 Sign in
               </button>

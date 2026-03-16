@@ -32,7 +32,7 @@ export default function HomePage() {
       {isWorkoutActive ? (
         <button
           onClick={() => setIsSheetOpen(true)}
-          className="w-full rounded-xl border border-primary/30 bg-primary/5 py-4 text-sm text-muted-foreground text-center active:bg-primary/10 transition-colors"
+          className="w-full rounded-sm border border-foreground/20 bg-surface py-4 text-sm text-muted-foreground text-center active:bg-foreground/8 transition-colors"
         >
           Workout in progress — tap the bar above to return
         </button>

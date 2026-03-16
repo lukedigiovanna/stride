@@ -140,7 +140,7 @@ export default function ProgressPhotos() {
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="flex items-center gap-1.5 text-sm text-primary font-medium active:opacity-70 disabled:opacity-50"
+          className="flex items-center gap-1.5 text-sm text-foreground font-bold underline underline-offset-2 active:opacity-70 disabled:opacity-50"
         >
           <Plus className="h-4 w-4" />
           {isUploading ? 'Uploading…' : 'Add Photo'}

@@ -36,7 +36,7 @@ interface CreateExerciseModalProps {
 }
 
 const selectClass =
-  'w-full bg-background border border-border rounded-md px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary';
+  'w-full bg-transparent border-0 border-b border-foreground/30 rounded-none px-0 py-2 text-sm text-foreground focus:outline-none focus:border-foreground transition-colors';
 
 export default function CreateExerciseModal({ open, onOpenChange }: CreateExerciseModalProps) {
   const { createExercise } = useExercises();
@@ -88,7 +88,7 @@ export default function CreateExerciseModal({ open, onOpenChange }: CreateExerci
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Incline Dumbbell Press"
-              className="bg-background border-border"
+              className=""
               autoFocus
             />
           </div>
