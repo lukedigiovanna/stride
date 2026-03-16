@@ -114,7 +114,9 @@ export default function ExerciseList({ exercises, weightMap, currentUserId }: Ex
       {/* List */}
       <div className="flex-1 overflow-y-auto pb-20">
         {filtered.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-12">No exercises found.</p>
+          <div className="flex items-center px-4 h-11 border-b border-border">
+            <span className="text-sm text-muted-foreground italic">No exercises found.</span>
+          </div>
         ) : (
           <div className="rounded-none">
             {filtered.map((exercise) => (

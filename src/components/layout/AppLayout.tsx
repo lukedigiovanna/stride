@@ -41,7 +41,7 @@ export default function AppLayout() {
     <div className="flex flex-col min-h-dvh bg-background">
       {/* Scrollable page content */}
       <main
-        className="flex-1 overflow-y-auto ruled-paper"
+        className="flex-1 overflow-y-auto"
         style={{
           paddingBottom: `calc(${bottomPadding}px + env(safe-area-inset-bottom, 0px))`,
         }}

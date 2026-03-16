@@ -58,10 +58,12 @@ const DAY_OPTIONS: { value: DayOfWeek; label: string }[] = [
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-3">
-      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-4">
-        {title}
-      </h3>
+    <div className="mt-6">
+      <div className="flex items-center px-4 h-9 border-t border-b border-border">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+          {title}
+        </h3>
+      </div>
       {children}
     </div>
   );
@@ -80,11 +82,11 @@ function SettingRow({ label, children }: { label: string; children: React.ReactN
 
 // ─── Lifetime stats tile ──────────────────────────────────────────────────────
 
-function StatTile({ label, value }: { label: string; value: string }) {
+function StatRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex-1 rounded-sm bg-surface border border-border p-3 flex flex-col items-center gap-0.5">
-      <span className="text-lg font-extrabold text-foreground tabular-nums">{value}</span>
-      <span className="text-[9px] text-muted-foreground uppercase tracking-wide text-center leading-tight">{label}</span>
+    <div className="flex items-center justify-between px-4 h-11 border-b border-border">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-bold text-foreground tabular-nums">{value}</span>
     </div>
   );
 }
@@ -222,17 +224,17 @@ export default function ProfilePage() {
         <h1 className="text-xl font-bold text-foreground">Profile</h1>
       </div>
 
-      <div className="space-y-8 pt-5">
+      <div className="pt-5 pb-6">
         {/* Rank card */}
         <RankCard profile={profile} />
 
         {/* Lifetime stats */}
         <Section title="Lifetime Stats">
-          <div className="flex gap-2 px-4">
-            <StatTile label="Workouts" value={totalWorkouts !== null ? String(totalWorkouts) : '—'} />
-            <StatTile label="Total Sets" value={totalSets !== null ? String(totalSets) : '—'} />
-            <StatTile label="Volume" value={totalVolumeLbs !== null ? fmtVol(totalVolumeLbs) : '—'} />
-            <StatTile label="Best Streak" value={bestStreak !== null ? String(bestStreak) : '—'} />
+          <div>
+            <StatRow label="Workouts" value={totalWorkouts !== null ? String(totalWorkouts) : '—'} />
+            <StatRow label="Total Sets" value={totalSets !== null ? String(totalSets) : '—'} />
+            <StatRow label="Volume" value={totalVolumeLbs !== null ? fmtVol(totalVolumeLbs) : '—'} />
+            <StatRow label="Best Streak" value={bestStreak !== null ? String(bestStreak) : '—'} />
           </div>
         </Section>
 
@@ -248,7 +250,7 @@ export default function ProfilePage() {
 
         {/* Settings */}
         <Section title="Settings">
-          <div className="rounded-sm border border-border overflow-hidden mx-4">
+          <div>
             {/* Weight unit */}
             <SettingRow label="Weight unit">
               <div className="flex rounded-sm border border-border overflow-hidden text-xs font-bold">
@@ -295,7 +297,7 @@ export default function ProfilePage() {
         </Section>
 
         {/* Sign out */}
-        <div className="px-4">
+        <div className="px-4 mt-6">
           <button
             onClick={signOut}
             className="w-full rounded-sm border border-destructive/40 py-3 text-sm font-bold text-destructive active:bg-destructive/10 transition-colors"

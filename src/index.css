@@ -80,17 +80,6 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Ruled notebook lines — apply to scrollable content areas */
-  .ruled-paper {
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent 0px,
-      transparent 27px,
-      #C8D4DC 27px,
-      #C8D4DC 28px
-    );
-    background-size: 100% 28px;
-  }
 }
 
 /* ─── Base styles ────────────────────────────────────────────────────────── */

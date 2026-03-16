@@ -15,11 +15,11 @@ interface Stats {
   streak: number;
 }
 
-function StatTile({ label, value }: { label: string; value: string }) {
+function StatRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex-1 rounded-sm bg-surface border border-border p-3 flex flex-col items-center gap-0.5">
-      <span className="text-xl font-extrabold text-foreground tabular-nums">{value}</span>
-      <span className="text-[10px] text-muted-foreground uppercase tracking-wide text-center">{label}</span>
+    <div className="flex items-center justify-between px-4 h-11 border-b border-border">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-bold text-foreground tabular-nums">{value}</span>
     </div>
   );
 }
@@ -121,25 +121,13 @@ export default function QuickStats({ profile }: QuickStatsProps) {
     n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(Math.round(n));
 
   return (
-    <div className="flex gap-2">
-      <StatTile
-        label="Workouts"
-        value={stats ? String(stats.totalWorkouts) : '—'}
-      />
-      <StatTile
+    <div>
+      <StatRow label="Workouts" value={stats ? String(stats.totalWorkouts) : '—'} />
+      <StatRow
         label={`This week (${profile.weight_unit})`}
-        value={
-          stats
-            ? stats.weekVolume !== null
-              ? fmt(stats.weekVolume)
-              : '0'
-            : '—'
-        }
+        value={stats ? (stats.weekVolume !== null ? fmt(stats.weekVolume) : '0') : '—'}
       />
-      <StatTile
-        label="Day streak"
-        value={stats ? String(stats.streak) : '—'}
-      />
+      <StatRow label="Day streak" value={stats ? String(stats.streak) : '—'} />
     </div>
   );
 }

@@ -88,16 +88,28 @@ export default function HistoryPage() {
 
   if (isLoading && workouts.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-        Loading history…
+      <div className="flex flex-col overflow-y-auto h-full">
+        <div className="px-4 pt-5 pb-3 border-b border-border shrink-0">
+          <h1 className="text-xl font-bold text-foreground">History</h1>
+        </div>
+        <div className="border-t border-border">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-14 border-b border-border animate-pulse bg-surface/50" />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (!isLoading && workouts.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground text-sm px-8 text-center">
-        No completed workouts yet. Finish your first session to see it here!
+      <div className="flex flex-col overflow-y-auto h-full">
+        <div className="px-4 pt-5 pb-3 border-b border-border shrink-0">
+          <h1 className="text-xl font-bold text-foreground">History</h1>
+        </div>
+        <div className="flex items-center px-4 h-11 border-b border-border">
+          <span className="text-sm text-muted-foreground italic">No completed workouts yet.</span>
+        </div>
       </div>
     );
   }

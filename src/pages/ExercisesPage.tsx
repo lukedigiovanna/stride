@@ -100,8 +100,12 @@ export default function ExercisesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-        Loading exercises…
+      <div className="flex flex-col h-full">
+        <div className="border-t border-border">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-12 border-b border-border animate-pulse bg-surface/50" />
+          ))}
+        </div>
       </div>
     );
   }

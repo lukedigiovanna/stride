@@ -95,7 +95,7 @@ export default function RecentActivity() {
     return (
       <div className="space-y-2">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-14 rounded-sm bg-surface border border-border animate-pulse" />
+          <div key={i} className="h-11 border-b border-border animate-pulse bg-surface/50" />
         ))}
       </div>
     );
@@ -103,9 +103,9 @@ export default function RecentActivity() {
 
   if (enriched.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground text-center py-4">
-        No completed workouts yet. Start your first session!
-      </p>
+      <div className="flex items-center px-4 h-11 border-b border-border">
+        <span className="text-sm text-muted-foreground italic">No completed workouts yet.</span>
+      </div>
     );
   }
 

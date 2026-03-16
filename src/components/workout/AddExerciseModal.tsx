@@ -93,7 +93,9 @@ export default function AddExerciseModal({
         {/* Exercise list */}
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-0.5">
           {filtered.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No exercises found.</p>
+            <div className="flex items-center px-1 h-11 border-b border-border">
+              <span className="text-sm text-muted-foreground italic">No exercises found.</span>
+            </div>
           ) : (
             filtered.map((exercise) => (
               <button

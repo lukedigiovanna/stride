@@ -277,7 +277,9 @@ export default function ExerciseAccordion({
 
             <AccordionContent className="px-0 pb-3">
               {categoryExercises.length === 0 ? (
-                <p className="text-xs text-muted-foreground px-3 py-2">No exercises in this category.</p>
+                <div className="flex items-center px-4 h-11 border-b border-border">
+                  <span className="text-sm text-muted-foreground italic">No exercises in this category.</span>
+                </div>
               ) : (
                 <div className="space-y-1.5">
                   {sorted.map((exercise) => (

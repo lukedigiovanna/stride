@@ -343,9 +343,9 @@ export default function ExerciseDetailPage() {
           <SetHistory sessions={sessions} isCardio={isCardio} />
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground text-center py-12 px-4">
-          No sets logged for this exercise yet.
-        </p>
+        <div className="flex items-center px-4 h-11 border-b border-border mt-4">
+          <span className="text-sm text-muted-foreground italic">No sets logged yet.</span>
+        </div>
       )}
     </div>
   );
