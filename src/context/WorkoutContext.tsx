@@ -9,7 +9,6 @@ import {
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
-import { checkLevelUp, createInitialProgress } from '@/lib/levelUp';
 import { calcStrengthSetXP, calcCardioSetXP } from '@/lib/xp';
 import {
   type PendingSetInsert,
@@ -23,9 +22,7 @@ import type {
   ActiveExerciseEntry,
   Exercise,
   WorkoutSet,
-  UserExerciseProgress,
   FinishWorkoutResult,
-  LevelUpResult,
   RestTimerState,
 } from '@/types';
 
@@ -279,44 +276,11 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     if (pErr) throw new Error(pErr.message);
     updateProfile({ total_xp: newTotalXp });
 
-    // 4. Run level-up checks for every exercise that has a level system
-    const levelUps: LevelUpResult[] = [];
-
-    for (const entry of entries) {
-      if (entry.exercise.level_increment_lbs === null) continue;
-
-      // Fetch current progress row (may not exist if this was first time)
-      const { data: progData } = await supabase
-        .from('user_exercise_progress')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('exercise_id', entry.exercise.id)
-        .maybeSingle();
-
-      const progress = progData as UserExerciseProgress | null;
-      if (!progress) continue;
-
-      const result = checkLevelUp(entry.sets, progress, entry.exercise);
-      if (!result) continue;
-
-      levelUps.push(result);
-
-      // 5. Persist the new level
-      await supabase
-        .from('user_exercise_progress')
-        .update({
-          current_level: result.newProgress.current_level,
-          level_target_weight_lbs: result.newProgress.level_target_weight_lbs,
-          updated_at: result.newProgress.updated_at,
-        })
-        .eq('id', progress.id);
-    }
-
-    // 6. Clear state
+    // 4. Clear state
     setActiveWorkout(null);
     setIsSheetOpen(false);
 
-    return { xpEarned, levelUps, previousTotalXp, newTotalXp };
+    return { xpEarned, previousTotalXp, newTotalXp };
   }, [activeWorkout, user, profile, setActiveWorkout, updateProfile]);
 
   const discardWorkout = useCallback(async () => {
@@ -435,16 +399,6 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
         },
       };
       setActiveWorkout(optimisticWorkout);
-
-      // Ensure a progress row exists (first time only)
-      if (!existingEntry && exercise.level_increment_lbs !== null) {
-        const initialProgress = createInitialProgress(user.id, exercise);
-        if (initialProgress) {
-          supabase
-            .from('user_exercise_progress')
-            .upsert(initialProgress, { onConflict: 'user_id,exercise_id' });
-        }
-      }
 
       // Write to DB
       const { data, error } = await supabase

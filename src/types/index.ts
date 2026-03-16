@@ -56,31 +56,7 @@ export interface Exercise {
   name: string;
   category: ExerciseCategory;
   equipment_type: EquipmentType;
-  /**
-   * Weight increment (in lbs) between exercise levels.
-   * Null for bodyweight exercises and cardio (no level system).
-   */
-  level_increment_lbs: number | null;
   created_at: string;
-}
-
-/** DB row — public.user_exercise_progress */
-export interface UserExerciseProgress {
-  id: string;
-  user_id: string;
-  exercise_id: string;
-  /** Current level for this exercise. Starts at 1. */
-  current_level: number;
-  /**
-   * Weight (lbs) required to qualify a set for the current level target.
-   * Null for bodyweight exercises.
-   */
-  level_target_weight_lbs: number | null;
-  /** Reps required per qualifying set. */
-  level_target_reps: number;
-  /** Number of qualifying sets required to advance to the next level. */
-  level_target_sets: number;
-  updated_at: string;
 }
 
 /** DB row — public.workouts */
@@ -144,15 +120,6 @@ export interface ProgressPhoto {
 // These are computed or composed in the application layer and never stored in DB.
 
 /**
- * An exercise enriched with the current user's progress for that exercise.
- * Used in the exercise list and workout accordion cards.
- */
-export interface ExerciseWithProgress extends Exercise {
-  /** Null if the user has never logged a set for this exercise. */
-  progress: UserExerciseProgress | null;
-}
-
-/**
  * One exercise's sets within an active workout session,
  * grouped for display in the workout accordion.
  */
@@ -193,31 +160,15 @@ export interface WorkoutDetail {
 export interface WorkoutDetailEntry {
   exercise: Exercise;
   sets: WorkoutSet[];
-  /** The user's exercise progress record at the time the workout was performed. */
-  progressAtTime: UserExerciseProgress | null;
 }
 
 /**
  * Returned by WorkoutContext.finishWorkout().
- * Carries everything the post-workout summary and level-up overlay need.
  */
 export interface FinishWorkoutResult {
   xpEarned: number;
-  levelUps: LevelUpResult[];
   previousTotalXp: number;
   newTotalXp: number;
-}
-
-/**
- * Describes a single exercise level-up event.
- * Used to trigger per-exercise toasts and the summary callout.
- */
-export interface LevelUpResult {
-  exercise: Exercise;
-  previousLevel: number;
-  newLevel: number;
-  /** The updated UserExerciseProgress row to be written to the DB. */
-  newProgress: UserExerciseProgress;
 }
 
 /**

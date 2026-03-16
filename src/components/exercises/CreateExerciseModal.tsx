@@ -44,27 +44,17 @@ export default function CreateExerciseModal({ open, onOpenChange }: CreateExerci
   const [name, setName] = useState('');
   const [category, setCategory] = useState<ExerciseCategory>('push');
   const [equipmentType, setEquipmentType] = useState<EquipmentType>('dumbbell');
-  const [levelIncrement, setLevelIncrement] = useState('5');
   const [isSaving, setIsSaving] = useState(false);
-
-  const showLevelIncrement = equipmentType !== 'bodyweight' && category !== 'cardio';
 
   function reset() {
     setName('');
     setCategory('push');
     setEquipmentType('dumbbell');
-    setLevelIncrement('5');
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-
-    const increment = showLevelIncrement ? parseFloat(levelIncrement) : null;
-    if (showLevelIncrement && (isNaN(increment!) || increment! <= 0)) {
-      toast.error('Level increment must be a positive number.');
-      return;
-    }
 
     setIsSaving(true);
     try {
@@ -72,7 +62,6 @@ export default function CreateExerciseModal({ open, onOpenChange }: CreateExerci
         name: name.trim(),
         category,
         equipment_type: equipmentType,
-        level_increment_lbs: increment,
       });
       toast.success(`"${name.trim()}" created.`);
       reset();
@@ -131,25 +120,6 @@ export default function CreateExerciseModal({ open, onOpenChange }: CreateExerci
               ))}
             </select>
           </div>
-
-          {/* Level increment — hidden for bodyweight / cardio */}
-          {showLevelIncrement && (
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground uppercase tracking-wide">
-                Level increment (lbs)
-              </label>
-              <p className="text-[11px] text-muted-foreground">
-                Weight added to the target each time you level up.
-              </p>
-              <Input
-                type="number"
-                inputMode="decimal"
-                value={levelIncrement}
-                onChange={(e) => setLevelIncrement(e.target.value)}
-                className="bg-background border-border"
-              />
-            </div>
-          )}
 
           <DialogFooter className="gap-2 pt-1">
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={isSaving}>

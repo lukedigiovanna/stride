@@ -12,7 +12,6 @@ import HistoryPage from '@/pages/HistoryPage';
 import WorkoutDetailPage from '@/pages/WorkoutDetailPage';
 import ProfilePage from '@/pages/ProfilePage';
 import WorkoutSheet from '@/components/workout/WorkoutSheet';
-import LevelUpOverlay from '@/components/shared/LevelUpOverlay';
 
 /**
  * Route tree:
@@ -54,7 +53,6 @@ export default function App() {
           </Routes>
 
           <WorkoutSheet />
-          <LevelUpOverlay />
           <Toaster position="top-center" richColors />
         </WorkoutProvider>
       </AuthProvider>

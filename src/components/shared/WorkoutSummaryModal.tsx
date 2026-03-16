@@ -8,7 +8,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import type { FinishWorkoutResult, ActiveExerciseEntry } from '@/types';
 
 function formatVolume(lbs: number): string {
@@ -80,26 +79,6 @@ export default function WorkoutSummaryModal({
             </div>
           ))}
         </div>
-
-        {/* Level-up callouts */}
-        {result.levelUps.length > 0 && (
-          <div className="mt-4 space-y-2">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-              Level ups
-            </h4>
-            {result.levelUps.map(({ exercise, previousLevel, newLevel }) => (
-              <div
-                key={exercise.id}
-                className="flex items-center justify-between rounded-lg bg-primary/10 border border-primary/30 px-3 py-2"
-              >
-                <span className="text-sm font-medium text-foreground">{exercise.name}</span>
-                <Badge className="bg-primary text-primary-foreground text-xs">
-                  Lv {previousLevel} → {newLevel}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        )}
 
         {/* Exercise breakdown */}
         <div className="mt-4 space-y-2">

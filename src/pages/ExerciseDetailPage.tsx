@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format, parseISO, subMonths } from 'date-fns';
 import { ArrowLeft } from 'lucide-react';
@@ -13,8 +12,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
-import { formatLevelTarget } from '@/lib/levelUp';
-import type { Exercise, UserExerciseProgress, WorkoutSet } from '@/types';
+import type { Exercise, WorkoutSet } from '@/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -55,60 +53,6 @@ function ChartTooltip({ active, payload, label }: {
     <div className="rounded bg-surface border border-border px-2 py-1 text-xs text-foreground shadow">
       <p className="text-muted-foreground">{label}</p>
       <p className="font-semibold">{payload[0].value.toLocaleString()}</p>
-    </div>
-  );
-}
-
-// ─── Level card ───────────────────────────────────────────────────────────────
-
-function LevelCard({
-  progress,
-  recentSets,
-}: {
-  progress: UserExerciseProgress;
-  recentSets: SetWithWorkout[];
-}) {
-  const { level_target_weight_lbs, level_target_reps, level_target_sets, current_level } = progress;
-
-  // Qualifying sets from the most recent session
-  const qualifyingCount = level_target_weight_lbs !== null
-    ? recentSets.filter(
-        (s) => s.weight_lbs >= level_target_weight_lbs && s.reps >= level_target_reps,
-      ).length
-    : 0;
-
-  const pct = level_target_sets > 0
-    ? Math.min(1, qualifyingCount / level_target_sets)
-    : 1;
-
-  return (
-    <div className="rounded-xl bg-surface border border-border p-4 space-y-3 mx-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs text-muted-foreground uppercase tracking-widest">Current level</p>
-          <p className="text-3xl font-extrabold text-foreground tabular-nums">{current_level}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-muted-foreground">Target</p>
-          <p className="text-sm font-semibold text-foreground">{formatLevelTarget(progress)}</p>
-        </div>
-      </div>
-
-      {/* Progress toward next level */}
-      <div className="space-y-1">
-        <div className="h-2 w-full rounded-full bg-border overflow-hidden">
-          <motion.div
-            className="h-full rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${(pct * 100).toFixed(2)}%` }}
-            transition={{ type: 'spring', stiffness: 100, damping: 20, delay: 0.3 }}
-            style={{ background: 'linear-gradient(90deg, var(--xp-start), var(--xp-end))' }}
-          />
-        </div>
-        <p className="text-[10px] text-muted-foreground">
-          {qualifyingCount} / {level_target_sets} qualifying sets (last session)
-        </p>
-      </div>
     </div>
   );
 }
@@ -262,7 +206,6 @@ export default function ExerciseDetailPage() {
   const navigate = useNavigate();
 
   const [exercise, setExercise] = useState<Exercise | null>(null);
-  const [progress, setProgress] = useState<UserExerciseProgress | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -283,17 +226,7 @@ export default function ExerciseDetailPage() {
       const ex = exData as Exercise;
       setExercise(ex);
 
-      // 2. User progress
-      const { data: progData } = await supabase
-        .from('user_exercise_progress')
-        .select('*')
-        .eq('user_id', user!.id)
-        .eq('exercise_id', id)
-        .maybeSingle();
-
-      setProgress(progData as UserExerciseProgress | null);
-
-      // 3. All sets for this exercise
+      // 2. All sets for this exercise
       const { data: setRows } = await supabase
         .from('sets')
         .select('*')
@@ -371,8 +304,6 @@ export default function ExerciseDetailPage() {
   }
 
   const isCardio = exercise.category === 'cardio';
-  const hasLevelSystem = exercise.level_increment_lbs !== null && exercise.equipment_type !== 'bodyweight';
-  const lastSession = sessions.length > 0 ? sessions[sessions.length - 1] : null;
 
   return (
     <div className="flex flex-col overflow-y-auto h-full">
@@ -398,13 +329,6 @@ export default function ExerciseDetailPage() {
           </div>
         </div>
       </div>
-
-      {/* Level card */}
-      {hasLevelSystem && progress && (
-        <div className="py-4">
-          <LevelCard progress={progress} recentSets={lastSession?.sets ?? []} />
-        </div>
-      )}
 
       {/* Charts */}
       {sessions.length > 0 && (

@@ -49,7 +49,6 @@ export type Database = {
           name: string;
           category: string;
           equipment_type: string;
-          level_increment_lbs: number | null;
           created_at: string;
         };
         Insert: {
@@ -58,7 +57,6 @@ export type Database = {
           name: string;
           category: string;
           equipment_type: string;
-          level_increment_lbs?: number | null;
           created_at?: string;
         };
         Update: {
@@ -67,36 +65,6 @@ export type Database = {
           name?: string;
           category?: string;
           equipment_type?: string;
-          level_increment_lbs?: number | null;
-        };
-      };
-      user_exercise_progress: {
-        Row: {
-          id: string;
-          user_id: string;
-          exercise_id: string;
-          current_level: number;
-          level_target_weight_lbs: number | null;
-          level_target_reps: number;
-          level_target_sets: number;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          exercise_id: string;
-          current_level?: number;
-          level_target_weight_lbs?: number | null;
-          level_target_reps?: number;
-          level_target_sets?: number;
-          updated_at?: string;
-        };
-        Update: {
-          current_level?: number;
-          level_target_weight_lbs?: number | null;
-          level_target_reps?: number;
-          level_target_sets?: number;
-          updated_at?: string;
         };
       };
       workouts: {

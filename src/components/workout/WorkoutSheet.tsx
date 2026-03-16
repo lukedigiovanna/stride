@@ -21,8 +21,6 @@ import ExerciseAccordion from './ExerciseAccordion';
 import AddExerciseModal from './AddExerciseModal';
 import RestTimer from './RestTimer';
 import WorkoutSummaryModal from '@/components/shared/WorkoutSummaryModal';
-import { getLevelFromXP } from '@/lib/xp';
-import { levelUpBridge } from '@/lib/levelUpBridge';
 import type { Exercise, ActiveExerciseEntry, FinishWorkoutResult } from '@/types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -95,32 +93,13 @@ export default function WorkoutSheet() {
       const result = await finishWorkout();
       setFinishDialogOpen(false);
 
-      // Fire one toast per exercise level-up
-      for (const lu of result.levelUps) {
-        toast(`🏋️ ${lu.exercise.name} → Level ${lu.newLevel}`, {
-          duration: 4000,
-          style: {
-            background: 'var(--surface)',
-            color: 'var(--foreground)',
-            border: '1px solid var(--primary)',
-          },
-        });
-      }
-
       // Store snapshot + result for summary modal
       setSummaryResult(result);
       setSummaryEntries(entriesSnapshot);
       setSummaryStartedAt(startedAtSnapshot);
       setSummaryEndedAt(endedAtSnapshot);
 
-      // If global level increased, let the overlay show first
-      const globalLevelBefore = getLevelFromXP(result.previousTotalXp);
-      const globalLevelAfter = getLevelFromXP(result.newTotalXp);
-      if (globalLevelAfter > globalLevelBefore) {
-        levelUpBridge.register(() => setSummaryOpen(true));
-      } else {
-        setSummaryOpen(true);
-      }
+      setSummaryOpen(true);
     } catch {
       toast.error('Failed to finish workout.');
     } finally {

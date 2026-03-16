@@ -7,8 +7,6 @@ export interface CreateExerciseInput {
   name: string;
   category: ExerciseCategory;
   equipment_type: EquipmentType;
-  /** Null for bodyweight and cardio exercises (no level system). */
-  level_increment_lbs: number | null;
 }
 
 interface UseExercisesReturn {

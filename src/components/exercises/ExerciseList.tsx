@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { Exercise, ExerciseCategory, UserExerciseProgress } from '@/types';
+import type { Exercise, ExerciseCategory } from '@/types';
 
 const CATEGORIES: { value: ExerciseCategory | 'all'; label: string }[] = [
   { value: 'all',    label: 'All'    },
@@ -17,23 +17,21 @@ const CATEGORIES: { value: ExerciseCategory | 'all'; label: string }[] = [
 
 interface ExerciseListProps {
   exercises: Exercise[];
-  /** Map of exercise_id → progress row for the current user. */
-  progressMap: Record<string, UserExerciseProgress>;
+  /** Map of exercise_id → current working weight (lbs). */
+  weightMap: Record<string, number>;
   currentUserId: string;
 }
 
 function ExerciseRow({
   exercise,
-  progress,
+  weight,
   isCustom,
 }: {
   exercise: Exercise;
-  progress: UserExerciseProgress | undefined;
+  weight: number | undefined;
   isCustom: boolean;
 }) {
   const navigate = useNavigate();
-  const level = progress?.current_level ?? null;
-  const showLevel = exercise.category !== 'cardio' && exercise.equipment_type !== 'bodyweight';
 
   return (
     <button
@@ -57,22 +55,18 @@ function ExerciseRow({
         </div>
       </div>
 
-      {/* Level */}
+      {/* Working weight */}
       <div className="flex items-center gap-1.5 shrink-0">
-        {showLevel ? (
-          <span className="text-sm tabular-nums text-muted-foreground">
-            {level !== null ? `Lv ${level}` : '—'}
-          </span>
-        ) : (
-          <span className="text-sm text-muted-foreground">—</span>
-        )}
+        <span className="text-sm tabular-nums text-muted-foreground">
+          {weight !== undefined ? `${weight} lbs` : '—'}
+        </span>
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
       </div>
     </button>
   );
 }
 
-export default function ExerciseList({ exercises, progressMap, currentUserId }: ExerciseListProps) {
+export default function ExerciseList({ exercises, weightMap, currentUserId }: ExerciseListProps) {
   const [categoryFilter, setCategoryFilter] = useState<ExerciseCategory | 'all'>('all');
   const [search, setSearch] = useState('');
 
@@ -127,7 +121,7 @@ export default function ExerciseList({ exercises, progressMap, currentUserId }: 
               <ExerciseRow
                 key={exercise.id}
                 exercise={exercise}
-                progress={progressMap[exercise.id]}
+                weight={weightMap[exercise.id]}
                 isCustom={exercise.user_id === currentUserId}
               />
             ))}

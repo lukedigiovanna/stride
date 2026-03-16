@@ -286,14 +286,10 @@ export default function WorkoutDetailPage() {
       {/* Exercise sections */}
       <div className="flex-1 px-4 pt-4 space-y-4 pb-6">
         {entries.map((entry) => {
-          const progress = entry.progressAtTime;
           return (
             <div key={entry.exercise.id}>
               <div className="flex items-baseline justify-between mb-1.5">
                 <h3 className="text-sm font-semibold text-foreground">{entry.exercise.name}</h3>
-                {progress && (
-                  <span className="text-xs text-muted-foreground">Lv {progress.current_level}</span>
-                )}
               </div>
 
               <div className="rounded-xl border border-border overflow-hidden">

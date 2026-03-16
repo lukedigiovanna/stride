@@ -7,7 +7,6 @@ import type {
   Workout,
   WorkoutSet,
   Exercise,
-  UserExerciseProgress,
 } from '@/types';
 
 interface UseWorkoutDetailReturn {
@@ -77,21 +76,8 @@ export function useWorkoutDetail(workoutId: string): UseWorkoutDetailReturn {
       exercises = (exData ?? []) as Exercise[];
     }
 
-    // 4. Fetch the user's progress snapshots for these exercises
-    let progressRows: UserExerciseProgress[] = [];
-    if (exerciseIds.length > 0) {
-      const { data: progData } = await supabase
-        .from('user_exercise_progress')
-        .select('*')
-        .eq('user_id', user.id)
-        .in('exercise_id', exerciseIds);
-
-      progressRows = (progData ?? []) as UserExerciseProgress[];
-    }
-
-    // 5. Group sets by exercise and build WorkoutDetailEntry[]
+    // 4. Group sets by exercise and build WorkoutDetailEntry[]
     const exerciseMap = new Map(exercises.map((e) => [e.id, e]));
-    const progressMap = new Map(progressRows.map((p) => [p.exercise_id, p]));
     const setsByExercise = new Map<string, WorkoutSet[]>();
 
     for (const set of sets) {
@@ -104,7 +90,6 @@ export function useWorkoutDetail(workoutId: string): UseWorkoutDetailReturn {
       .map((id) => ({
         exercise: exerciseMap.get(id)!,
         sets: setsByExercise.get(id) ?? [],
-        progressAtTime: progressMap.get(id) ?? null,
       }))
       .filter((e) => e.exercise != null);
 

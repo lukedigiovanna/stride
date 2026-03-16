@@ -5,28 +5,97 @@ import { useAuth } from '@/context/AuthContext';
 import { useExercises } from '@/hooks/useExercises';
 import ExerciseList from '@/components/exercises/ExerciseList';
 import CreateExerciseModal from '@/components/exercises/CreateExerciseModal';
-import type { UserExerciseProgress } from '@/types';
+import type { WorkoutSet } from '@/types';
+
+/** Compute mode weight from an array of sets. Ties broken by the higher weight. */
+function modeWeight(sets: WorkoutSet[]): number {
+  const counts: Record<number, number> = {};
+  for (const s of sets) {
+    counts[s.weight_lbs] = (counts[s.weight_lbs] ?? 0) + 1;
+  }
+  let best = -Infinity;
+  let bestCount = 0;
+  for (const [w, c] of Object.entries(counts)) {
+    const weight = Number(w);
+    if (c > bestCount || (c === bestCount && weight > best)) {
+      best = weight;
+      bestCount = c;
+    }
+  }
+  return best;
+}
 
 export default function ExercisesPage() {
   const { user } = useAuth();
   const { exercises, isLoading } = useExercises();
-  const [progressMap, setProgressMap] = useState<Record<string, UserExerciseProgress>>({});
+  const [weightMap, setWeightMap] = useState<Record<string, number>>({});
   const [createOpen, setCreateOpen] = useState(false);
 
-  // Load all progress rows for this user in one query
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from('user_exercise_progress')
-      .select('*')
-      .eq('user_id', user.id)
-      .then(({ data }) => {
-        const map: Record<string, UserExerciseProgress> = {};
-        for (const row of (data ?? []) as UserExerciseProgress[]) {
-          map[row.exercise_id] = row;
+
+    async function loadWorkingWeights() {
+      // 1. For each exercise, find the most recent completed workout date
+      const { data: latestRows } = await supabase
+        .from('sets')
+        .select('exercise_id, workout_id, logged_at')
+        .eq('user_id', user!.id)
+        .order('logged_at', { ascending: false });
+
+      if (!latestRows || latestRows.length === 0) return;
+
+      // Find the most recent workout_id per exercise_id
+      const latestWorkoutPerExercise: Record<string, string> = {};
+      for (const row of latestRows as { exercise_id: string; workout_id: string; logged_at: string }[]) {
+        if (!latestWorkoutPerExercise[row.exercise_id]) {
+          latestWorkoutPerExercise[row.exercise_id] = row.workout_id;
         }
-        setProgressMap(map);
-      });
+      }
+
+      // 2. Only consider sets from completed workouts
+      const workoutIds = [...new Set(Object.values(latestWorkoutPerExercise))];
+      const { data: completedWorkouts } = await supabase
+        .from('workouts')
+        .select('id')
+        .in('id', workoutIds)
+        .not('ended_at', 'is', null);
+
+      const completedSet = new Set((completedWorkouts ?? []).map((w: { id: string }) => w.id));
+
+      // Filter to only completed workouts
+      const validLatest: Record<string, string> = {};
+      for (const [exId, wId] of Object.entries(latestWorkoutPerExercise)) {
+        if (completedSet.has(wId)) validLatest[exId] = wId;
+      }
+
+      if (Object.keys(validLatest).length === 0) return;
+
+      // 3. Fetch all sets for those (exercise, workout) pairs
+      const { data: allSets } = await supabase
+        .from('sets')
+        .select('exercise_id, workout_id, weight_lbs, reps')
+        .eq('user_id', user!.id)
+        .in('workout_id', [...new Set(Object.values(validLatest))]);
+
+      if (!allSets) return;
+
+      // 4. Group sets by exercise_id, filtered to the correct workout
+      const setsByExercise: Record<string, WorkoutSet[]> = {};
+      for (const s of allSets as WorkoutSet[]) {
+        if (validLatest[s.exercise_id] !== s.workout_id) continue;
+        if (!setsByExercise[s.exercise_id]) setsByExercise[s.exercise_id] = [];
+        setsByExercise[s.exercise_id].push(s);
+      }
+
+      // 5. Compute mode weight per exercise
+      const map: Record<string, number> = {};
+      for (const [exId, sets] of Object.entries(setsByExercise)) {
+        map[exId] = modeWeight(sets);
+      }
+      setWeightMap(map);
+    }
+
+    loadWorkingWeights();
   }, [user]);
 
   if (isLoading) {
@@ -41,7 +110,7 @@ export default function ExercisesPage() {
     <div className="flex flex-col h-full relative">
       <ExerciseList
         exercises={exercises}
-        progressMap={progressMap}
+        weightMap={weightMap}
         currentUserId={user?.id ?? ''}
       />
 
