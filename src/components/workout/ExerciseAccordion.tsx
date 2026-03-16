@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDown,
   ArrowUp,
+  ChevronDown,
+  ChevronUp,
   Dumbbell,
   Heart,
   MoreHorizontal,
@@ -15,8 +17,12 @@ import {
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { formatWeight } from '@/lib/units';
+import { useWorkout } from '@/context/WorkoutContext';
+import { useExercisePreviousSets } from '@/hooks/useExercisePreviousSets';
 import SetRow from './SetRow';
 import SetLogger from './SetLogger';
+import PreviousSetsPreview from './PreviousSetsPreview';
 import type {
   Exercise,
   ExerciseCategory,
@@ -47,8 +53,9 @@ const CATEGORY_ORDER: ExerciseCategory[] = [
 interface ExerciseCardProps {
   exercise: Exercise;
   entry: ActiveExerciseEntry | undefined;
+  previousData: { lastWorkedAt: string; sets: import('@/types').WorkoutSet[] } | null;
   isExpanded: boolean;
-  onExpand: () => void;
+  onToggle: () => void;
   sevenDayAvgLbs: number | null;
   weightUnit: WeightUnit;
 }
@@ -56,28 +63,48 @@ interface ExerciseCardProps {
 function ExerciseCard({
   exercise,
   entry,
+  previousData,
   isExpanded,
-  onExpand,
+  onToggle,
   sevenDayAvgLbs,
   weightUnit,
 }: ExerciseCardProps) {
   const sets = entry?.sets ?? [];
   const hasSessionSets = sets.length > 0;
 
+  // ── Unworked + collapsed ─────────────────────────────────────────────────
   if (!hasSessionSets && !isExpanded) {
-    // Compact tappable row for unworked exercises
     return (
       <button
-        onClick={onExpand}
-        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left active:bg-border/30 transition-colors"
+        onClick={onToggle}
+        className="w-full flex flex-col px-3 py-2.5 rounded-lg text-left active:bg-border/30 transition-colors"
       >
-        <span className="text-sm text-foreground flex-1">{exercise.name}</span>
-        <span className="text-xs text-muted-foreground capitalize">{exercise.equipment_type}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-foreground flex-1">{exercise.name}</span>
+          <span className="text-xs text-muted-foreground capitalize">{exercise.equipment_type}</span>
+        </div>
       </button>
     );
   }
 
-  // Expanded card — shows sets + logger
+  // ── Worked + collapsed ───────────────────────────────────────────────────
+  if (hasSessionSets && !isExpanded) {
+    const lastWeight = sets[sets.length - 1].weight_lbs;
+    return (
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border border-primary/30 bg-primary/5 text-left active:bg-primary/10 transition-colors"
+      >
+        <span className="text-sm text-foreground flex-1">{exercise.name}</span>
+        <span className="text-xs text-primary font-medium tabular-nums">
+          {sets.length} {sets.length === 1 ? 'set' : 'sets'} · {formatWeight(lastWeight, weightUnit)}
+        </span>
+        <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+      </button>
+    );
+  }
+
+  // ── Expanded ─────────────────────────────────────────────────────────────
   return (
     <div
       className={cn(
@@ -88,12 +115,29 @@ function ExerciseCard({
       {/* Header */}
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold text-foreground">{exercise.name}</span>
-        {hasSessionSets && (
-          <span className="text-xs text-primary font-medium tabular-nums">
-            {sets.length} {sets.length === 1 ? 'set' : 'sets'}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {hasSessionSets && (
+            <span className="text-xs text-primary font-medium tabular-nums">
+              {sets.length} {sets.length === 1 ? 'set' : 'sets'}
+            </span>
+          )}
+          <button
+            onClick={onToggle}
+            className="p-0.5 text-muted-foreground active:text-foreground"
+          >
+            <ChevronUp className="h-4 w-4" />
+          </button>
+        </div>
       </div>
+
+      {/* Previous session reference */}
+      {previousData && (
+        <PreviousSetsPreview
+          lastWorkedAt={previousData.lastWorkedAt}
+          sets={previousData.sets}
+          exercise={exercise}
+        />
+      )}
 
       {/* Logged sets */}
       {sets.map((set, idx) => (
@@ -134,14 +178,39 @@ export default function ExerciseAccordion({
   pendingExercise,
   onPendingHandled,
 }: ExerciseAccordionProps) {
+  const { activeWorkout } = useWorkout();
+  const previousData = useExercisePreviousSets(activeWorkout?.workoutId ?? null);
+
   const [openCategory, setOpenCategory] = useState<string>('');
-  const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(null);
+  // Multi-expand: track which exercise IDs are expanded
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  function toggleExercise(id: string) {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  // Auto-expand exercises when their first set is logged in this session.
+  // Using entries as dep — when a new exercise_id appears, add it to the set.
+  useEffect(() => {
+    const workedIds = Object.keys(entries);
+    if (workedIds.length === 0) return;
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      workedIds.forEach((id) => next.add(id));
+      return next;
+    });
+  }, [entries]);
 
   // Handle exercise selected from AddExerciseModal
   useEffect(() => {
     if (!pendingExercise) return;
     setOpenCategory(pendingExercise.category);
-    setExpandedExerciseId(pendingExercise.id);
+    setExpandedIds((prev) => new Set([...prev, pendingExercise.id]));
     onPendingHandled();
   }, [pendingExercise, onPendingHandled]);
 
@@ -154,6 +223,24 @@ export default function ExerciseAccordion({
     { legs: [], push: [], pull: [], core: [], cardio: [], misc: [] },
   );
 
+  // Build stable sort orders per category, keyed off previousData.
+  // previousData only changes once (empty → populated after fetch), so the
+  // computed order is effectively frozen for the session after first load.
+  const sortedByCategory = useMemo(() => {
+    const result: Record<string, Exercise[]> = {};
+    for (const cat of CATEGORY_ORDER) {
+      result[cat] = [...byCategory[cat]].sort((a, b) => {
+        const aAt = previousData.get(a.id)?.lastWorkedAt ?? null;
+        const bAt = previousData.get(b.id)?.lastWorkedAt ?? null;
+        if (aAt && bAt) return bAt.localeCompare(aAt); // most recent first
+        if (aAt) return -1;
+        if (bAt) return 1;
+        return a.name.localeCompare(b.name); // never done → alphabetical
+      });
+    }
+    return result;
+  }, [exercises, previousData]);
+
   return (
     <Accordion
       type="single"
@@ -161,27 +248,14 @@ export default function ExerciseAccordion({
       value={openCategory}
       onValueChange={(val) => {
         setOpenCategory(val);
-        // Clear expanded exercise when switching categories
-        if (val !== openCategory) setExpandedExerciseId(null);
       }}
       className="w-full"
     >
       {CATEGORY_ORDER.map((category) => {
         const { label, Icon } = CATEGORY_META[category];
         const categoryExercises = byCategory[category];
+        const sorted = sortedByCategory[category] ?? categoryExercises;
         const workedCount = categoryExercises.filter((e) => entries[e.id]).length;
-
-        // Sort: worked exercises first (by lastLoggedAt desc), then unworked (alphabetical)
-        const sorted = [...categoryExercises].sort((a, b) => {
-          const aEntry = entries[a.id];
-          const bEntry = entries[b.id];
-          if (aEntry && bEntry) {
-            return (bEntry.lastLoggedAt ?? '').localeCompare(aEntry.lastLoggedAt ?? '');
-          }
-          if (aEntry) return -1;
-          if (bEntry) return 1;
-          return a.name.localeCompare(b.name);
-        });
 
         return (
           <AccordionItem
@@ -206,21 +280,18 @@ export default function ExerciseAccordion({
                 <p className="text-xs text-muted-foreground px-3 py-2">No exercises in this category.</p>
               ) : (
                 <div className="space-y-1.5">
-                  {sorted.map((exercise) => {
-                    const entry = entries[exercise.id];
-                    const isExpanded = expandedExerciseId === exercise.id;
-                    return (
-                      <ExerciseCard
-                        key={exercise.id}
-                        exercise={exercise}
-                        entry={entry}
-                        isExpanded={isExpanded || !!entry}
-                        onExpand={() => setExpandedExerciseId(exercise.id)}
-                        sevenDayAvgLbs={sevenDayAvgLbs}
-                        weightUnit={weightUnit}
-                      />
-                    );
-                  })}
+                  {sorted.map((exercise) => (
+                    <ExerciseCard
+                      key={exercise.id}
+                      exercise={exercise}
+                      entry={entries[exercise.id]}
+                      previousData={previousData.get(exercise.id) ?? null}
+                      isExpanded={expandedIds.has(exercise.id)}
+                      onToggle={() => toggleExercise(exercise.id)}
+                      sevenDayAvgLbs={sevenDayAvgLbs}
+                      weightUnit={weightUnit}
+                    />
+                  ))}
                 </div>
               )}
             </AccordionContent>

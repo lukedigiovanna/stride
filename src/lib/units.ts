@@ -34,7 +34,7 @@ export const formatWeight = (weightLbs: number, unit: WeightUnit): string => {
   const value = fromLbs(weightLbs, unit);
   // Show one decimal place only when there is a fractional part
   const formatted = value % 1 === 0 ? value.toString() : value.toFixed(1);
-  return `${formatted} ${unit}`;
+  return `${formatted}${unit}`;
 };
 
 /**
