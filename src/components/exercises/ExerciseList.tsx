@@ -118,7 +118,7 @@ export default function ExerciseList({ exercises, progressMap, currentUserId }: 
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pb-20">
         {filtered.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-12">No exercises found.</p>
         ) : (

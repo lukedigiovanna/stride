@@ -144,8 +144,6 @@ export default function CreateExerciseModal({ open, onOpenChange }: CreateExerci
               <Input
                 type="number"
                 inputMode="decimal"
-                min="1"
-                step="2.5"
                 value={levelIncrement}
                 onChange={(e) => setLevelIncrement(e.target.value)}
                 className="bg-background border-border"
