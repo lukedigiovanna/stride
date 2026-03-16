@@ -138,7 +138,7 @@ export default function BodyweightSection({ unit }: BodyweightSectionProps) {
 
   // --- Trend ---
   let trendText: string | null = null;
-  if (range !== 'allTime' && filtered.length >= 2) {
+  if (filtered.length >= 2) {
     const points = chartData.map(d => ({ x: d.ts, y: d.weight }));
     const slope = linearRegression(points);
     // Use actual data span rather than full window, so a 3-month view with
@@ -153,8 +153,10 @@ export default function BodyweightSection({ unit }: BodyweightSectionProps) {
       trendText = `${changeStr} ${suffix}`;
     } else if (range === 'months3') {
       trendText = `${changeStr} over last 3 months`;
-    } else {
+    } else if (range === 'year') {
       trendText = `${changeStr} over last year`;
+    } else {
+      trendText = `${changeStr} all time`;
     }
   }
 
