@@ -109,6 +109,45 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
   });
 
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+
+  // ── Screen wake lock ────────────────────────────────────────────────────────
+
+  const acquireWakeLock = useCallback(async () => {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      wakeLockRef.current = await navigator.wakeLock.request('screen');
+    } catch {
+      // Silently fail — not critical
+    }
+  }, []);
+
+  const releaseWakeLock = useCallback(async () => {
+    if (wakeLockRef.current) {
+      await wakeLockRef.current.release();
+      wakeLockRef.current = null;
+    }
+  }, []);
+
+  // Acquire/release based on active workout
+  useEffect(() => {
+    if (activeWorkout) {
+      acquireWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+  }, [activeWorkout, acquireWakeLock, releaseWakeLock]);
+
+  // Re-acquire after page becomes visible again (wake lock is auto-released on hide)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && activeWorkout) {
+        acquireWakeLock();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [activeWorkout, acquireWakeLock]);
 
   /** Wrapper that also persists to localStorage on every change. */
   const setActiveWorkout = useCallback((next: ActiveWorkout | null) => {
