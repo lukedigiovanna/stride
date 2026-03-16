@@ -5,11 +5,11 @@ import type { ActiveWorkout } from '@/types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Formats milliseconds of elapsed time as M:SS or H:MM:SS */
-function formatElapsed(startedAt: string): string {
+/** Formats elapsed time as M:SS or H:MM:SS given an explicit now timestamp. */
+function formatElapsed(startedAt: string, now: number): string {
   const totalSeconds = Math.max(
     0,
-    Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000),
+    Math.floor((now - new Date(startedAt).getTime()) / 1000),
   );
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
@@ -51,18 +51,18 @@ function formatVolume(lbs: number): string {
  */
 export default function WorkoutBar() {
   const { activeWorkout, setIsSheetOpen } = useWorkout();
-  const [, setTick] = useState(0);
+  const [now, setNow] = useState(Date.now);
 
-  // Re-render every second to update elapsed time
+  // Tick every second, storing Date.now() so React Compiler sees it as a changing input
   useEffect(() => {
     if (!activeWorkout) return;
-    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
-  }, [activeWorkout]);
+  }, [activeWorkout?.workoutId]);
 
   if (!activeWorkout) return null;
 
-  const elapsed = formatElapsed(activeWorkout.startedAt);
+  const elapsed = formatElapsed(activeWorkout.startedAt, now);
   const volume = formatVolume(calcVolume(activeWorkout));
   const setCount = Object.values(activeWorkout.entries).reduce(
     (n, e) => n + e.sets.length,
@@ -72,29 +72,35 @@ export default function WorkoutBar() {
   return (
     <button
       onClick={() => setIsSheetOpen(true)}
-      className="fixed left-0 right-0 z-40 flex items-center gap-3 px-4 bg-primary/10 border-t border-primary/30 backdrop-blur-sm cursor-pointer active:bg-primary/20 transition-colors"
+      className="fixed left-0 right-0 z-40 cursor-pointer active:opacity-80 transition-opacity"
       style={{
         bottom: 'calc(4rem + env(safe-area-inset-bottom, 0px))',
         height: '52px',
       }}
     >
-      {/* Icon */}
-      <Dumbbell className="h-4 w-4 text-primary shrink-0" strokeWidth={2} />
+      {/* Blur layer — isolated so it doesn't prevent text repaints */}
+      <div className="absolute inset-0 bg-primary/10 border-t border-primary/30 backdrop-blur-sm" />
 
-      {/* Label */}
-      <span className="text-sm font-semibold text-primary">Workout in progress</span>
+      {/* Content layer */}
+      <div className="relative flex items-center gap-3 px-4 h-full">
+        {/* Icon */}
+        <Dumbbell className="h-4 w-4 text-primary shrink-0" strokeWidth={2} />
 
-      {/* Stats */}
-      <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
-        <span className="tabular-nums font-medium text-foreground">{elapsed}</span>
-        <span className="text-border">·</span>
-        <span className="tabular-nums">{volume}</span>
-        <span className="text-border">·</span>
-        <span>{setCount} {setCount === 1 ? 'set' : 'sets'}</span>
+        {/* Label */}
+        <span className="text-sm font-semibold text-primary">Workout in progress</span>
+
+        {/* Stats */}
+        <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="tabular-nums font-medium text-foreground">{elapsed}</span>
+          <span className="text-border">·</span>
+          <span className="tabular-nums">{volume}</span>
+          <span className="text-border">·</span>
+          <span>{setCount} {setCount === 1 ? 'set' : 'sets'}</span>
+        </div>
+
+        {/* Expand chevron */}
+        <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0 ml-1" />
       </div>
-
-      {/* Expand chevron */}
-      <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0 ml-1" />
     </button>
   );
 }
