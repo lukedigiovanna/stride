@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { format, parseISO, subMonths } from 'date-fns';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Pencil } from 'lucide-react';
 import {
   BarChart, Bar,
   LineChart, Line,
@@ -10,8 +10,15 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
+import { useExerciseTargets } from '@/hooks/useExerciseTargets';
+import {
+  formatSetRange,
+  formatRepRange,
+  formatRestRange,
+} from '@/lib/targets';
 import type { Exercise, WorkoutSet } from '@/types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -198,6 +205,265 @@ function SetHistory({ sessions, isCardio }: { sessions: Session[]; isCardio: boo
   );
 }
 
+// ─── Targets section ──────────────────────────────────────────────────────────
+
+function ExerciseTargetsSection({ exerciseId }: { exerciseId: string }) {
+  const { target, isLoading, upsertTarget, clearTarget } = useExerciseTargets(exerciseId);
+  const [editing, setEditing] = useState(false);
+
+  // Local form state (strings so inputs stay controlled)
+  const [setsMin, setSetsMin] = useState('');
+  const [setsMax, setSetsMax] = useState('');
+  const [repsMin, setRepsMin] = useState('');
+  const [repsMax, setRepsMax] = useState('');
+  const [restMin, setRestMin] = useState('');
+  const [restMax, setRestMax] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  function openEdit() {
+    setSetsMin(target?.target_sets_min?.toString() ?? '');
+    setSetsMax(target?.target_sets_max?.toString() ?? '');
+    setRepsMin(target?.target_reps_min?.toString() ?? '');
+    setRepsMax(target?.target_reps_max?.toString() ?? '');
+    setRestMin(target?.target_rest_seconds_min?.toString() ?? '');
+    setRestMax(target?.target_rest_seconds_max?.toString() ?? '');
+    setValidationError(null);
+    setEditing(true);
+  }
+
+  function cancelEdit() {
+    setEditing(false);
+    setValidationError(null);
+  }
+
+  function parseField(val: string): number | null {
+    const n = parseInt(val, 10);
+    return isNaN(n) ? null : n;
+  }
+
+  async function handleSave() {
+    const sm = parseField(setsMin);
+    const sx = parseField(setsMax);
+    const rm = parseField(repsMin);
+    const rx = parseField(repsMax);
+    const tm = parseField(restMin);
+    const tx = parseField(restMax);
+
+    // Validation
+    if ((sm !== null && sm <= 0) || (sx !== null && sx <= 0)) {
+      setValidationError('Set counts must be positive.');
+      return;
+    }
+    if ((rm !== null && rm <= 0) || (rx !== null && rx <= 0)) {
+      setValidationError('Rep counts must be positive.');
+      return;
+    }
+    if ((tm !== null && tm <= 0) || (tx !== null && tx <= 0)) {
+      setValidationError('Rest values must be positive.');
+      return;
+    }
+    if (sm !== null && sx !== null && sm > sx) {
+      setValidationError('Min sets cannot exceed max sets.');
+      return;
+    }
+    if (rm !== null && rx !== null && rm > rx) {
+      setValidationError('Min reps cannot exceed max reps.');
+      return;
+    }
+    if (tm !== null && tx !== null && tm > tx) {
+      setValidationError('Min rest cannot exceed max rest.');
+      return;
+    }
+
+    const allNull = sm === null && sx === null && rm === null && rx === null && tm === null && tx === null;
+
+    setIsSaving(true);
+    if (allNull) {
+      await clearTarget();
+    } else {
+      await upsertTarget({
+        target_sets_min: sm,
+        target_sets_max: sx,
+        target_reps_min: rm,
+        target_reps_max: rx,
+        target_rest_seconds_min: tm,
+        target_rest_seconds_max: tx,
+      });
+    }
+    setIsSaving(false);
+    setEditing(false);
+  }
+
+  const hasTarget = target !== null && (
+    target.target_sets_min !== null || target.target_sets_max !== null ||
+    target.target_reps_min !== null || target.target_reps_max !== null ||
+    target.target_rest_seconds_min !== null || target.target_rest_seconds_max !== null
+  );
+
+  if (isLoading) return null;
+
+  return (
+    <div className="px-4 pb-6 border-t border-border pt-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+          Your Targets
+        </h3>
+        {!editing && (
+          hasTarget ? (
+            <button
+              onClick={openEdit}
+              className="p-1 text-muted-foreground active:text-foreground"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          ) : (
+            <button
+              onClick={openEdit}
+              className="text-xs text-amber-500 font-medium"
+            >
+              Set targets
+            </button>
+          )
+        )}
+      </div>
+
+      {!editing && !hasTarget && (
+        <p className="text-sm text-muted-foreground italic">No targets set.</p>
+      )}
+
+      {!editing && hasTarget && (
+        <div className="space-y-1">
+          {(target.target_sets_min !== null || target.target_sets_max !== null) && (
+            <div className="flex gap-4 text-sm">
+              <span className="text-muted-foreground w-10">Sets</span>
+              <span className="text-foreground">
+                {formatSetRange(target.target_sets_min, target.target_sets_max)}
+              </span>
+            </div>
+          )}
+          {(target.target_reps_min !== null || target.target_reps_max !== null) && (
+            <div className="flex gap-4 text-sm">
+              <span className="text-muted-foreground w-10">Reps</span>
+              <span className="text-foreground">
+                {formatRepRange(target.target_reps_min, target.target_reps_max)}
+              </span>
+            </div>
+          )}
+          {(target.target_rest_seconds_min !== null || target.target_rest_seconds_max !== null) && (
+            <div className="flex gap-4 text-sm">
+              <span className="text-muted-foreground w-10">Rest</span>
+              <span className="text-foreground">
+                {formatRestRange(target.target_rest_seconds_min, target.target_rest_seconds_max)}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {editing && (
+        <div className="space-y-3">
+          {/* Sets */}
+          <div>
+            <p className="text-xs text-muted-foreground mb-1.5">Sets</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                placeholder="Min"
+                value={setsMin}
+                onChange={(e) => setSetsMin(e.target.value)}
+                className="w-full rounded-sm border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <span className="text-muted-foreground text-xs shrink-0">–</span>
+              <input
+                type="number"
+                min={1}
+                placeholder="Max"
+                value={setsMax}
+                onChange={(e) => setSetsMax(e.target.value)}
+                className="w-full rounded-sm border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          {/* Reps */}
+          <div>
+            <p className="text-xs text-muted-foreground mb-1.5">Reps</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                placeholder="Min"
+                value={repsMin}
+                onChange={(e) => setRepsMin(e.target.value)}
+                className="w-full rounded-sm border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <span className="text-muted-foreground text-xs shrink-0">–</span>
+              <input
+                type="number"
+                min={1}
+                placeholder="Max"
+                value={repsMax}
+                onChange={(e) => setRepsMax(e.target.value)}
+                className="w-full rounded-sm border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          {/* Rest */}
+          <div>
+            <p className="text-xs text-muted-foreground mb-1.5">Rest <span className="text-muted-foreground/60">(seconds)</span></p>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                placeholder="Min"
+                value={restMin}
+                onChange={(e) => setRestMin(e.target.value)}
+                className="w-full rounded-sm border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <span className="text-muted-foreground text-xs shrink-0">–</span>
+              <input
+                type="number"
+                min={1}
+                placeholder="Max"
+                value={restMax}
+                onChange={(e) => setRestMax(e.target.value)}
+                className="w-full rounded-sm border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+          </div>
+
+          {validationError && (
+            <p className="text-xs text-destructive">{validationError}</p>
+          )}
+
+          <div className="flex gap-2 pt-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={cancelEdit}
+              disabled={isSaving}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="flex-1"
+            >
+              {isSaving ? 'Saving…' : 'Save'}
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ExerciseDetailPage() {
@@ -329,6 +595,9 @@ export default function ExerciseDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Targets */}
+      {!isCardio && <ExerciseTargetsSection exerciseId={exercise.id} />}
 
       {/* Charts */}
       {sessions.length > 0 && (

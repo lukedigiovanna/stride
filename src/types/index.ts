@@ -187,6 +187,21 @@ export interface GamificationState {
   nextRank: string | null;
 }
 
+/** DB row — public.user_exercise_targets */
+export interface ExerciseTarget {
+  id: string;
+  user_id: string;
+  exercise_id: string;
+  target_sets_min: number | null;
+  target_sets_max: number | null;
+  target_reps_min: number | null;
+  target_reps_max: number | null;
+  target_rest_seconds_min: number | null;
+  target_rest_seconds_max: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
 /** State of the rest timer held in WorkoutContext. */
 export type RestTimerStatus = 'idle' | 'running';
 

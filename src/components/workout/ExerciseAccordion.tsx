@@ -18,6 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { formatWeight } from '@/lib/units';
+import { buildTargetHint } from '@/lib/targets';
 import { useWorkout } from '@/context/WorkoutContext';
 import { useExercisePreviousSets } from '@/hooks/useExercisePreviousSets';
 import SetRow from './SetRow';
@@ -26,6 +27,7 @@ import PreviousSetsPreview from './PreviousSetsPreview';
 import type {
   Exercise,
   ExerciseCategory,
+  ExerciseTarget,
   ActiveExerciseEntry,
   WeightUnit,
 } from '@/types';
@@ -54,6 +56,7 @@ interface ExerciseCardProps {
   exercise: Exercise;
   entry: ActiveExerciseEntry | undefined;
   previousData: { lastWorkedAt: string; sets: import('@/types').WorkoutSet[] } | null;
+  target: ExerciseTarget | null;
   isExpanded: boolean;
   onToggle: () => void;
   sevenDayAvgLbs: number | null;
@@ -64,6 +67,7 @@ function ExerciseCard({
   exercise,
   entry,
   previousData,
+  target,
   isExpanded,
   onToggle,
   sevenDayAvgLbs,
@@ -71,6 +75,9 @@ function ExerciseCard({
 }: ExerciseCardProps) {
   const sets = entry?.sets ?? [];
   const hasSessionSets = sets.length > 0;
+  const targetHint = (target && exercise.category !== 'cardio')
+    ? buildTargetHint(target)
+    : null;
 
   // ── Unworked + collapsed ─────────────────────────────────────────────────
   if (!hasSessionSets && !isExpanded) {
@@ -130,6 +137,13 @@ function ExerciseCard({
         </div>
       </div>
 
+      {/* Target hint */}
+      {targetHint && (
+        <p className="text-xs text-muted-foreground">
+          <span className="text-amber-500 font-medium">Target:</span> {targetHint}
+        </p>
+      )}
+
       {/* Previous session reference */}
       {previousData && (
         <PreviousSetsPreview
@@ -160,6 +174,7 @@ function ExerciseCard({
 interface ExerciseAccordionProps {
   exercises: Exercise[];
   entries: Record<string, ActiveExerciseEntry>;
+  exerciseTargets: Map<string, ExerciseTarget>;
   sevenDayAvgLbs: number | null;
   weightUnit: WeightUnit;
   /**
@@ -173,6 +188,7 @@ interface ExerciseAccordionProps {
 export default function ExerciseAccordion({
   exercises,
   entries,
+  exerciseTargets,
   sevenDayAvgLbs,
   weightUnit,
   pendingExercise,
@@ -294,6 +310,7 @@ export default function ExerciseAccordion({
                       exercise={exercise}
                       entry={entries[exercise.id]}
                       previousData={previousData.get(exercise.id) ?? null}
+                      target={exerciseTargets.get(exercise.id) ?? null}
                       isExpanded={expandedIds.has(exercise.id)}
                       onToggle={() => toggleExercise(exercise.id)}
                       sevenDayAvgLbs={sevenDayAvgLbs}

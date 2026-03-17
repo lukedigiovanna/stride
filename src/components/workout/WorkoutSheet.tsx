@@ -49,7 +49,7 @@ function formatVolume(lbs: number): string {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function WorkoutSheet() {
-  const { activeWorkout, isSheetOpen, setIsSheetOpen, finishWorkout, discardWorkout } = useWorkout();
+  const { activeWorkout, isSheetOpen, setIsSheetOpen, finishWorkout, discardWorkout, exerciseTargets } = useWorkout();
   const { profile } = useAuth();
   const { exercises } = useExercises();
   const { sevenDayAvgLbs } = useBodyweightLogs();
@@ -195,6 +195,7 @@ export default function WorkoutSheet() {
             <ExerciseAccordion
               exercises={exercises}
               entries={activeWorkout.entries}
+              exerciseTargets={exerciseTargets}
               sevenDayAvgLbs={sevenDayAvgLbs}
               weightUnit={profile?.weight_unit ?? 'lbs'}
               pendingExercise={pendingExercise}

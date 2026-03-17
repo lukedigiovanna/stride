@@ -21,6 +21,7 @@ import type {
   ActiveWorkout,
   ActiveExerciseEntry,
   Exercise,
+  ExerciseTarget,
   WorkoutSet,
   FinishWorkoutResult,
   RestTimerState,
@@ -64,6 +65,9 @@ interface WorkoutContextValue {
   updateSet: (setId: string, weightLbs: number, reps: number) => Promise<void>;
   deleteSet: (setId: string) => Promise<void>;
 
+  /** Map of exerciseId → ExerciseTarget for all of the user's targets. */
+  exerciseTargets: Map<string, ExerciseTarget>;
+
   // ── Rest timer ─────────────────────────────────────────────────────────────
   restTimer: RestTimerState;
   startRestTimer: () => void;
@@ -102,6 +106,7 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
 
   const [activeWorkout, setActiveWorkoutRaw] = useState<ActiveWorkout | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [exerciseTargets, setExerciseTargets] = useState<Map<string, ExerciseTarget>>(new Map());
   const [restTimer, setRestTimer] = useState<RestTimerState>({
     status: 'idle',
     elapsedMs: 0,
@@ -236,6 +241,23 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
 
     hydrate();
   // Only run once on mount / user change
+  }, [user?.id]);
+
+  // ── Exercise targets fetch ─────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('user_exercise_targets')
+      .select('*')
+      .eq('user_id', user.id)
+      .then(({ data }) => {
+        const map = new Map<string, ExerciseTarget>();
+        for (const row of (data ?? []) as ExerciseTarget[]) {
+          map.set(row.exercise_id, row);
+        }
+        setExerciseTargets(map);
+      });
   }, [user?.id]);
 
   // ── Rest timer tick ────────────────────────────────────────────────────────
@@ -587,6 +609,7 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
         isWorkoutActive: activeWorkout !== null,
         isSheetOpen,
         setIsSheetOpen,
+        exerciseTargets,
         startWorkout,
         finishWorkout,
         discardWorkout,
