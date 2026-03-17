@@ -188,7 +188,7 @@ export interface GamificationState {
 }
 
 /** State of the rest timer held in WorkoutContext. */
-export type RestTimerStatus = 'idle' | 'running' | 'paused';
+export type RestTimerStatus = 'idle' | 'running';
 
 export interface RestTimerState {
   status: RestTimerStatus;

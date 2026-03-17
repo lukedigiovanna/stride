@@ -143,7 +143,7 @@ export default function WorkoutSheet() {
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent
           side="bottom"
-          className="p-0 bg-surface border-border rounded-t-2xl flex flex-col"
+          className="p-0 bg-surface border-border rounded-t-2xl flex flex-col gap-0"
           style={{ height: '87dvh' }}
           onInteractOutside={(e) => e.preventDefault()}
         >
