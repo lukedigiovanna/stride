@@ -83,7 +83,6 @@ export function useExercisePreviousSets(
     load();
     return () => { cancelled = true; };
   // Only run once per workout session — currentWorkoutId won't change mid-session.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, currentWorkoutId]);
 
   return data;

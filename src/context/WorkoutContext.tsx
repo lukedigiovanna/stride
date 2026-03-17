@@ -71,7 +71,6 @@ interface WorkoutContextValue {
   // ── Rest timer ─────────────────────────────────────────────────────────────
   restTimer: RestTimerState;
   startRestTimer: () => void;
-  pauseRestTimer: () => void;
   resumeRestTimer: () => void;
   resetRestTimer: () => void;
 }
@@ -584,14 +583,6 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
     setRestTimer({ status: 'running', elapsedMs: 0, startTime: Date.now() });
   }, []);
 
-  const pauseRestTimer = useCallback(() => {
-    setRestTimer((prev) => ({
-      status: 'paused',
-      elapsedMs: prev.elapsedMs + (prev.startTime ? Date.now() - prev.startTime : 0),
-      startTime: null,
-    }));
-  }, []);
-
   const resumeRestTimer = useCallback(() => {
     setRestTimer((prev) => ({ ...prev, status: 'running', startTime: Date.now() }));
   }, []);
@@ -618,7 +609,6 @@ export function WorkoutProvider({ children }: { children: React.ReactNode }) {
         deleteSet,
         restTimer,
         startRestTimer,
-        pauseRestTimer,
         resumeRestTimer,
         resetRestTimer,
       }}
