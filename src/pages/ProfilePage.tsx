@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { startOfDay, subDays, parseISO } from 'date-fns';
+import { startOfDay, parseISO } from 'date-fns';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import RankCard from '@/components/profile/RankCard';
@@ -17,31 +17,38 @@ import type { DayOfWeek, Workout, WeightUnit } from '@/types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+const MS_PER_DAY = 86_400_000;
+const BREAK_DAYS = 7;
+
+/**
+ * Best streak = longest period (in days) without a 7+ day break, across all time.
+ * For the currently-active period, counts through today.
+ */
 function computeBestStreak(workouts: Workout[]): number {
   if (workouts.length === 0) return 0;
 
-  const daySet = new Set(
-    workouts.map((w) => startOfDay(parseISO(w.started_at)).toISOString()),
-  );
+  const days = [...new Set(
+    workouts.map((w) => startOfDay(parseISO(w.started_at)).getTime()),
+  )].sort((a, b) => a - b);
 
-  let bestStreak = 0;
-  let current = 0;
-  let cursor = startOfDay(new Date());
+  const today = startOfDay(new Date()).getTime();
 
-  // Walk backwards from today; as soon as a day is missing, reset
-  for (let i = 0; i < 1000; i++) {
-    if (daySet.has(cursor.toISOString())) {
-      current++;
-      bestStreak = Math.max(bestStreak, current);
-    } else {
-      if (bestStreak > 0) break; // gap hit after some days — walk no further
+  let best = 0;
+  let segmentStart = days[0];
+
+  for (let i = 1; i < days.length; i++) {
+    if ((days[i] - days[i - 1]) / MS_PER_DAY >= BREAK_DAYS) {
+      best = Math.max(best, Math.round((days[i - 1] - segmentStart) / MS_PER_DAY) + 1);
+      segmentStart = days[i];
     }
-    cursor = subDays(cursor, 1);
   }
 
-  // Also scan non-continuous streaks in the past
-  // Simple approach: just return the streak ending today (most meaningful)
-  return bestStreak;
+  // Last / current segment: extend through today if not yet broken
+  const lastDay = days[days.length - 1];
+  const segmentEnd = (today - lastDay) / MS_PER_DAY < BREAK_DAYS ? today : lastDay;
+  best = Math.max(best, Math.round((segmentEnd - segmentStart) / MS_PER_DAY) + 1);
+
+  return best;
 }
 
 const DAY_OPTIONS: { value: DayOfWeek; label: string }[] = [

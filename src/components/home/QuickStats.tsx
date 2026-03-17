@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { startOfWeek, endOfWeek, parseISO, startOfDay, subDays } from 'date-fns';
+import { startOfWeek, endOfWeek, parseISO, startOfDay } from 'date-fns';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { fromLbs } from '@/lib/units';
@@ -24,24 +24,35 @@ function StatRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** Compute streak: consecutive calendar days ending today with ≥ 1 completed workout. */
+const MS_PER_DAY = 86_400_000;
+const BREAK_DAYS = 7; // a gap of this many days or more ends the streak
+
+/**
+ * Streak = days elapsed from the start of the current unbroken period to today.
+ * A period ends when there is a gap of ≥ 7 days between consecutive workout days,
+ * or when the user has not worked out in the last 7 days.
+ */
 function computeStreak(workouts: Workout[]): number {
   if (workouts.length === 0) return 0;
 
-  // Collect unique dates (YYYY-MM-DD) of completed workouts
-  const daySet = new Set(
-    workouts.map((w) => startOfDay(parseISO(w.started_at)).toISOString()),
-  );
+  const days = [...new Set(
+    workouts.map((w) => startOfDay(parseISO(w.started_at)).getTime()),
+  )].sort((a, b) => a - b);
 
-  let streak = 0;
-  let cursor = startOfDay(new Date());
+  const today = startOfDay(new Date()).getTime();
 
-  while (daySet.has(cursor.toISOString())) {
-    streak++;
-    cursor = subDays(cursor, 1);
+  // Streak is broken if the last workout was 7+ days ago
+  if ((today - days[days.length - 1]) / MS_PER_DAY >= BREAK_DAYS) return 0;
+
+  // Walk forward to find where the current streak segment started
+  let streakStart = days[0];
+  for (let i = 1; i < days.length; i++) {
+    if ((days[i] - days[i - 1]) / MS_PER_DAY >= BREAK_DAYS) {
+      streakStart = days[i];
+    }
   }
 
-  return streak;
+  return Math.round((today - streakStart) / MS_PER_DAY) + 1;
 }
 
 export default function QuickStats({ profile }: QuickStatsProps) {
@@ -127,7 +138,7 @@ export default function QuickStats({ profile }: QuickStatsProps) {
         label={`This week (${profile.weight_unit})`}
         value={stats ? (stats.weekVolume !== null ? fmt(stats.weekVolume) : '0') : '—'}
       />
-      <StatRow label="Day streak" value={stats ? String(stats.streak) : '—'} />
+      <StatRow label="Streak (days)" value={stats ? String(stats.streak) : '—'} />
     </div>
   );
 }
