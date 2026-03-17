@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowDown,
   ArrowUp,
@@ -194,14 +194,20 @@ export default function ExerciseAccordion({
     });
   }
 
-  // Auto-expand exercises when their first set is logged in this session.
-  // Using entries as dep — when a new exercise_id appears, add it to the set.
+  // Track which exercise IDs have already been seen (had at least one set) so we
+  // only auto-expand on the *first* set logged, not on every subsequent update.
+  const seenWorkedIds = useRef<Set<string>>(new Set());
+
+  // Auto-expand an exercise only when it appears in entries for the first time.
   useEffect(() => {
     const workedIds = Object.keys(entries);
     if (workedIds.length === 0) return;
+    const newIds = workedIds.filter((id) => !seenWorkedIds.current.has(id));
+    if (newIds.length === 0) return;
+    newIds.forEach((id) => seenWorkedIds.current.add(id));
     setExpandedIds((prev) => {
       const next = new Set(prev);
-      workedIds.forEach((id) => next.add(id));
+      newIds.forEach((id) => next.add(id));
       return next;
     });
   }, [entries]);
